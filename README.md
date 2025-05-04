@@ -1,2 +1,48 @@
 # project-khepri
 A AI-driven code modernization framework for legacy codebases.
+
+## Goal
+The goal of this project is to provide an opinionated agent-driven process to produce high-quality modernized code from a legacy system.
+
+## The Approach
+The approach we will be implementing relies on several tools to be developed that produce intermediary representations of the code base so LLMs can have greater context and feedback loops as heuristics to inform their migration/modernization strategy. Below, we outline the tools identified to produce the emergent, catalytics capabilities of an AI modernization agent.
+
+### Tools
+- Code2
+  - NL: Generates a queryable knowledge base from code.
+  - Comments: Enhances existing code with comments/annotations to improve LLM reasoning.
+  - ReferenceDocs: Produce reference docs of the code base.
+  - JsonSchema: Produce Json Schema docs for all public record/dto types.
+  - Protobuf: Generates protobuf definitions as an IDL to simplify serialization of method signatures for later generation.
+  - BDD Docs (Gherkin/Gauge): Produce busines requirement feature descriptions from code.
+  - SBOM (CycloneDX): Generates a description of package dependencies for the project, to load type info and descriptions.
+  - Structurizr: Generates model diagrams of the app/system. Provides c4 diagrams at a minimum.
+  - TOSCA/CUE: Provides a model diagram of the logical and deployment architectures.
+  - Test-Spec: Generates test cases to determine total coverage and provide regression suites on public types.
+  - BPMN: Generates business process workflow definitions from code.
+- Image2
+  - Code: Creates UI code.
+  - DesignTokens: Extracts design elements from an image as a standard intermediary format.
+  - CSF3: Extracts design components from an images as a standrad intermediary format.
+- NL2
+  - Code: Produce code from natural language.
+  - Structurizr: Generate model diagrams of the app/system.
+  - TOSCA/CUE: Provides a model diagram of the logical and deployment architectures.
+  - BPMN: Generates business process workflow definitions from natural language.
+ 
+### Inputs
+- Code: Ingest code to build multiple representations of the code.
+- LSIF: Ingest current model of code in current context.
+- ReferenceDocs: Ingest reference docs to reason about code in a more complete context aware manner.
+- BDD Docs: Ingest feature files to figure out the business context and direct association to executable code.
+- Structurizr: Ingest model diagrams to understand the relationship of executable entities across the app (especially in distributed contexts).
+- TOSCA/CUE: Ingest models to determine the execution/hosting context of applications to better understand resilience needs and gaps.
+- BPMN: Ingest bpmn diagrams to understand the busines context better.
+- DesignTokens/CSF3: Ingest design assets and design system documentation to understand visual design requirements.
+
+#### Customizations
+- Technical Docs: Specify frameworks and target tech stack.
+- Policy info: Specify which regulatory requirements you need to be compliant with that could influence design.
+- Code Style Guidelines: Provide style preferences for code-gen.
+- Standards and Practices: Describe team patterns and practices for outputs.
+

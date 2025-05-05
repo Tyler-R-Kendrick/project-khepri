@@ -1,4 +1,4 @@
-# project-khepri
+# Project Khepri
 A AI-driven code modernization framework for legacy codebases.
 
 ## Goal
@@ -8,6 +8,11 @@ The goal of this project is to provide an opinionated agent-driven process to pr
 The approach we will be implementing relies on several tools to be developed that produce intermediary representations of the code base so LLMs can have greater context and feedback loops as heuristics to inform their migration/modernization strategy. Below, we outline the tools identified to produce the emergent, catalytics capabilities of an AI modernization agent.
 
 ### Tools
+- KnowledgeGraphRag: Models intermediary representations of code, business rules, and custom conventions.
+- Planner4
+  - Upgrades: Looks at version docs for a tech to identify upgrade path(s) and create a plan.
+  - Rehosting: Evaluates hosting strategies and identify how to safely move from one hosting model to another.
+  - Replatform: Evaluates usage of a technology/package and how to move to a different technology/package.
 - Code2
   - NL: Generates a queryable knowledge base from code.
   - Comments: Enhances existing code with comments/annotations to improve LLM reasoning.
@@ -40,7 +45,7 @@ The approach we will be implementing relies on several tools to be developed tha
 - BPMN: Ingest bpmn diagrams to understand the busines context better.
 - DesignTokens/CSF3: Ingest design assets and design system documentation to understand visual design requirements.
 
-#### Customizations
+#### Customizations / Conventions
 - Technical Docs: Specify frameworks and target tech stack.
 - Policy info: Specify which regulatory requirements you need to be compliant with that could influence design.
 - Code Style Guidelines: Provide style preferences for code-gen.

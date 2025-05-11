@@ -51,3 +51,16 @@ The approach we will be implementing relies on several tools to be developed tha
 - Code Style Guidelines: Provide style preferences for code-gen.
 - Standards and Practices: Describe team patterns and practices for outputs.
 
+### Undecided Intermediary Representation Formats
+The following areas still need to be solved:
+- Code conventions (.editor-config, linters, etc.)
+- static application security testing (SAST tools like Veracode, CheckMarx, SonarQube, etc.)
+- static analysis (Semgrep)
+- Infrastructure as Code (IAC)
+- CI/CD pipeline config ([OAM?](https://github.com/oam-dev/spec)).
+- [Policy as Code](https://www.cncf.io/blog/2024/02/14/policy-as-code-in-the-software-supply-chain/) (something like CUE for CI/CD, Cedar for runtime, OPA, or Rego)
+- Workflow Configurations DSLs ([CNCF Serverless Workflows](https://www.cncf.io/projects/serverless-workflow/), [OpenWDL](https://github.com/openwdl/wdl), [CWL](https://www.commonwl.org/, [Conductor?](https://conductor-oss.github.io/conductor/devguide/concepts/index.html), [etc.](https://github.com/common-workflow-language/common-workflow-language/wiki/Existing-Workflow-systems))
+- Testing DSL
+- Intermediate Verification Languages (Boogie, WhyML, [OCL](https://www.omg.org/spec/OCL/2.4/PDF), [Dafny](https://github.com/dafny-lang/dafny), etc.)
+- Universal modeling DSLs ([D2?](https://d2lang.com/))
+

@@ -1,0 +1,7 @@
+<Project Sdk="MSTest.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Code2\NL\Code2NL.csproj" />
+    </ItemGroup>
+
+</Project>

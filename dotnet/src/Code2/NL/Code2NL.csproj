@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="../../Core/Tools/Core.Tools.csproj" />
+    </ItemGroup>
+
+</Project>

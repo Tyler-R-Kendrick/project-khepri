@@ -1,0 +1,35 @@
+<Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <!-- Apply only to real test projects (Microsoft.NET.Test.Sdk sets IsTestProject=true) -->
+    <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+
+        <!-- Strip the “.Tests” suffix from the current project’s file name -->
+        <TargetProjectName>
+            $([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '\.Tests$', ''))
+        </TargetProjectName>
+        
+        <!-- Remove the trailing slash and peel off the *immediate* directory -->
+        <_LastDir>
+        $([System.IO.Path]::GetFileName(
+            $([System.IO.Path]::GetDirectoryName('$(MSBuildThisFileDirectory)'))))
+        </_LastDir>
+
+        <!-- Peel off one more level to get the *parent* of that directory -->
+        <_SecondLastDir>
+        $([System.IO.Path]::GetFileName(
+            $([System.IO.Path]::GetDirectoryName(
+                $([System.IO.Path]::GetDirectoryName('$(MSBuildThisFileDirectory)'))))))
+        </_SecondLastDir>
+
+        <!-- Build an absolute path like  src\Foo\Foo.csproj  -->
+        <TargetProjectPath>
+            $([System.IO.Path]::Combine('../../../', 'src', '$(_LastDir)', '$(_SecondLastDir)', '$(TargetProjectName).csproj'))
+        </TargetProjectPath>
+    </PropertyGroup>
+
+    <!-- Add the reference for every test project -->
+    <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+        <ProjectReference Include="$(TargetProjectPath)" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,11 @@
+<Project>
+
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>Khepri</RootNamespace>
+        <AssemblyName>$(RootNamespace).$(MSBuildProjectName)</AssemblyName>
+    </PropertyGroup>
+
+</Project>

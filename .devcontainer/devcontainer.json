@@ -1,0 +1,23 @@
+{
+	"name": "Multi-container Dev Environment",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "primary",
+	"workspaceFolder": "/workspace",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot",
+				"ms-azuretools.vscode-containers",
+				"ms-dotnettools.csdevkit",
+				"ms-windows-ai-studio.windows-ai-studio",
+				"ms-semantic-kernel.semantic-kernel",
+				"azsdktm.SecurityIntelliSense",
+				"genaiscript.genaiscript-vscode",
+				"PDETs-prod.AI-Powered-Authoring",
+				"ms-windows-ai-studio.microsoft-ai-tools-pack",
+				"PDETs-prod.new-module-creation"
+			]
+		}
+	},
+	"postStartCommand": "bash .devcontainer/install-dependencies.sh"
+}

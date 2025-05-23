@@ -7,6 +7,16 @@ The goal of this project is to provide an opinionated agent-driven process to pr
 ## The Approach
 The approach we will be implementing relies on several tools to be developed that produce intermediary representations of the code base so LLMs can have greater context and feedback loops as heuristics to inform their migration/modernization strategy. Below, we outline the tools identified to produce the emergent, catalytics capabilities of an AI modernization agent.
 
+### Flow
+To make the flow easy to debug, iterate on, and extend - we will build out multiple agents as part of an agentic workflow.
+The workflow itself will be static, but each step will be orchestrated by an agent responsible for that phase of development.
+
+Below, is an example of this process flow:
+
+```mermaidjs
+
+```
+
 ### Tools
 - KnowledgeGraphRag: Models intermediary representations of code, business rules, and custom conventions.
 - Planner4

@@ -1,4 +1,4 @@
-using Khepri.Code2NL;
+using Khepri.Code2AST;
 
 internal class Program
 {

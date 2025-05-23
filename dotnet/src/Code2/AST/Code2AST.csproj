@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <ItemGroup>
+        <ProjectReference Include="../../Core/Tools/Core.Tools.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- <Protobuf Include="scip.proto" GrpcServices="None" /> -->
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Antlr4">
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
+    </ItemGroup>
+
+</Project>

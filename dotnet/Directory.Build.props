@@ -6,6 +6,8 @@
         <LangVersion>latest</LangVersion>
         <RootNamespace>Khepri</RootNamespace>
         <AssemblyName>$(RootNamespace).$(MSBuildProjectName)</AssemblyName>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
 </Project>

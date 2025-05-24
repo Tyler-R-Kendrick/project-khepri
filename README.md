@@ -10,10 +10,118 @@ The approach we will be implementing relies on several tools to be developed tha
 ### Flow
 To make the flow easy to debug, iterate on, and extend - we will build out multiple agents as part of an agentic workflow.
 The workflow itself will be static, but each step will be orchestrated by an agent responsible for that phase of development.
+Each agent should be enabled with A2A so that it could be reused across agent-enabled products.
+Each collection of agent capabilities with a distinct bounded domain concern should be exposed as an MCP server to maximize reuse.
 
 Below, is an example of this process flow:
+```mermaid
+sequenceDiagram
+    participant orch as Orchestrator
+    participant know as Knowledge<br/>Agent
+    participant dev as Developer<br/>Agent
+    participant planner as Planning<br/>Agent
 
-```mermaidjs
+    orch->>know: build legacy system knowledge.
+    know->>planner: build regression suite plan.
+    planner->>dev: build regression suite.
+    orch->>know: build knowledge index of target system.
+    orch->>dev: build target system
+```
+```mermaid
+sequenceDiagram
+    participant spec as Spec<br/>Agent
+    participant know as Know<br/>Agent
+    participant plan as Plan<br/>Agent
+    participant code as Code<br/>Agent
+    participant test as Test<br/>Agent
+    participant assess as Mod<br/>Assess
+    participant user as User
+    participant legacy as Legacy<br/>System
+    participant modern as Modern<br/>System
+    participant orch as Orchestration<br/>Agent
+    participant scaffold as Scaffolding<br/>Agent
+
+    user->>orch: request modernization of legacy system.
+    %% build knowledge index of legacy system.
+    orch->>spec: request collection/generation of IR on legacy system.
+    spec->>legacy: collect/generate IR of source code
+    spec->>plan: plan files for generation
+    plan->>user: request feedback/approval for files.
+    user->>plan: provide feedback/approval.
+    plan->>spec: give spec generation plan
+    spec->>spec: generate missing specs.
+    spec-->>know: index IR specs
+    know-->>spec: notify specs indexed.
+    spec-->>orch: notify completion.
+
+    %% annotate legacy system context
+    orch->>user: request business context as heuristics (glossary, artifacts, etc.)
+    user->>orch: provide docs
+    orch->>know: index docs
+    know-->orch: notify docs indexed.
+
+    %% build regression suite
+    orch->>plan: generate/collect test plan for source
+    plan->>know: query test plan for source
+    know->>plan: return test plan
+    plan->>plan: generate test plan if none exists.
+    plan->>user: request test plan approval.
+    user-->>plan: provide feedback/approval.
+    plan->>code: generate missing tests
+    code->>plan: notify tests generated
+    plan-->>orch: notify source test plan exists.
+    orch->>test: request test run
+    test->>test: run tests
+    test-->>orch: notify test results
+    orch->>know: index test results
+    know-->>orch: notify test results indexed
+
+    %% build knowledge index of target system
+    orch->>user: request intermediary representations of target system.
+    user-->>orch: provide docs / IR specs.
+    orch->>user: request team patterns, practices, and preferences.
+    user-->>orch: provide docs.
+    orch->>know: index docs
+    know-->>orch: notify docs indexed.
+
+    %% build target system
+    orch->>plan: request scaffolding plan for target
+    plan->>user: request feedback/approval
+    user-->>plan: approve plan
+    plan-->>orch: notify project scaffolding plan
+    orch->>scaffold: send project scaffolding plan
+    scaffold->>modern: implement project scaffolding plan
+    scaffold->>orch: notify project scaffold implemented
+    %% stub types
+    orch->>know: request minimal type signatures for tests
+    know->>orch: return types
+    orch->>plan: request type scaffold plan
+    plan->>user: request feedback/approval
+    user-->>plan: approve plan
+    plan->>scaffold: request plan execution
+    scaffold->>modern: execute plan
+    scaffold-->>plan: notify plan executed
+    plan->>code: request generation of code in target
+    code->>modern: execute plan
+    code-->plan: notify plan executed
+    plan->>orch: notify stub types generated
+    %% create test stubs
+    orch->>plan: request test plan for target 
+    plan->>user: request feedback/approval
+    user-->>plan: approve plan
+    plan-->>orch: notify test plan approved
+    orch->>code: request test code generation for target
+    code->>modern: generate test code for target
+    code-->orch: notify test code generated
+    %% inner dev loop
+    orch->>test: request test execution
+    test->>modern: run tests
+    test-->>orch: notify test results
+    orch->>code: implement test result feedback
+    code->>user: request feedback/approval
+    user-->>code: approve code
+    code->>modern: refactor code
+    code-->>orch: notify code refactored
 
 ```
 

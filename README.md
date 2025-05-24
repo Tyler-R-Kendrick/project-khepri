@@ -19,10 +19,13 @@ sequenceDiagram
     participant orch as Orchestrator
     participant know as Knowledge<br/>Agent
     participant dev as Developer<br/>Agent
+    participant planner as Planning<br/>Agent
 
     orch->>know: build legacy system knowledge.
+    orch->>planner: build regression suite plan.
     orch->>dev: build regression suite.
     orch->>know: build target system knowledge.
+    orch->>planner: build target system implementation plan.
     orch->>dev: build target system.
 ```
 ```mermaid

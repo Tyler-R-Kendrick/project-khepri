@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.Development",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.UserDelegation", "src\Khepri.Agents.UserDelegation\Khepri.Agents.UserDelegation.csproj", "{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Workflows.Modernization", "src\Khepri.Workflows.Modernization\Khepri.Workflows.Modernization.csproj", "{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.Workflow", "src\Khepri.Agents.Workflow\Khepri.Agents.Workflow.csproj", "{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{981AA80F-919A-48F5-9330-2AE258723926}"
 EndProject

@@ -1,0 +1,6 @@
+@Khepri.Agents.Development_HostAddress = http://localhost:5116
+
+GET {{Khepri.Agents.Development_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

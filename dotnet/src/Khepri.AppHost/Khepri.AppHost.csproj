@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>0f8f2b29-bf8a-42a9-9a8f-e574d049d483</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Khepri.Agents.Knowledge/Khepri.Agents.Knowledge.csproj" />
+    <ProjectReference Include="../Khepri.Agents.Planning/Khepri.Agents.Planning.csproj" />
+    <ProjectReference Include="../Khepri.Agents.Development/Khepri.Agents.Development.csproj" />
+    <ProjectReference Include="../Khepri.Agents.UserDelegation/Khepri.Agents.UserDelegation.csproj" />
+  </ItemGroup>
+
+</Project>

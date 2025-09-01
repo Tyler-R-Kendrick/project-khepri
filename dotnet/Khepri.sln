@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E063457-CFB4-4EFF-AB46-99F1502B53A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.AppHost", "src\Khepri.AppHost\Khepri.AppHost.csproj", "{B80240A7-16D7-47AB-BB3B-D854A4DBC208}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.ServiceDefaults", "src\Khepri.ServiceDefaults\Khepri.ServiceDefaults.csproj", "{39F83D7F-4488-4EE4-BC4D-39825CBAE531}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.Knowledge", "src\Khepri.Agents.Knowledge\Khepri.Agents.Knowledge.csproj", "{B112EE1F-5C79-4ED2-95D6-F07286388C20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.Planning", "src\Khepri.Agents.Planning\Khepri.Agents.Planning.csproj", "{B3381A89-7A1E-418A-9873-8CDA7AFF700E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.Development", "src\Khepri.Agents.Development\Khepri.Agents.Development.csproj", "{31627E8E-C222-440D-9375-CED0820F75D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Agents.UserDelegation", "src\Khepri.Agents.UserDelegation\Khepri.Agents.UserDelegation.csproj", "{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Workflows.Modernization", "src\Khepri.Workflows.Modernization\Khepri.Workflows.Modernization.csproj", "{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{981AA80F-919A-48F5-9330-2AE258723926}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Tests.Unit", "tests\Khepri.Tests.Unit\Khepri.Tests.Unit.csproj", "{EA441540-8A7B-455A-BA9F-83598D13830F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khepri.Tests.Integration", "tests\Khepri.Tests.Integration\Khepri.Tests.Integration.csproj", "{863CDFDD-1334-4762-B2C7-71062BFA5549}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B80240A7-16D7-47AB-BB3B-D854A4DBC208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B80240A7-16D7-47AB-BB3B-D854A4DBC208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B80240A7-16D7-47AB-BB3B-D854A4DBC208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B80240A7-16D7-47AB-BB3B-D854A4DBC208}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39F83D7F-4488-4EE4-BC4D-39825CBAE531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39F83D7F-4488-4EE4-BC4D-39825CBAE531}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39F83D7F-4488-4EE4-BC4D-39825CBAE531}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39F83D7F-4488-4EE4-BC4D-39825CBAE531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B112EE1F-5C79-4ED2-95D6-F07286388C20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B112EE1F-5C79-4ED2-95D6-F07286388C20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B112EE1F-5C79-4ED2-95D6-F07286388C20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B112EE1F-5C79-4ED2-95D6-F07286388C20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3381A89-7A1E-418A-9873-8CDA7AFF700E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3381A89-7A1E-418A-9873-8CDA7AFF700E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3381A89-7A1E-418A-9873-8CDA7AFF700E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3381A89-7A1E-418A-9873-8CDA7AFF700E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31627E8E-C222-440D-9375-CED0820F75D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31627E8E-C222-440D-9375-CED0820F75D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31627E8E-C222-440D-9375-CED0820F75D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31627E8E-C222-440D-9375-CED0820F75D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA441540-8A7B-455A-BA9F-83598D13830F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA441540-8A7B-455A-BA9F-83598D13830F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA441540-8A7B-455A-BA9F-83598D13830F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA441540-8A7B-455A-BA9F-83598D13830F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{863CDFDD-1334-4762-B2C7-71062BFA5549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{863CDFDD-1334-4762-B2C7-71062BFA5549}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{863CDFDD-1334-4762-B2C7-71062BFA5549}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{863CDFDD-1334-4762-B2C7-71062BFA5549}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B80240A7-16D7-47AB-BB3B-D854A4DBC208} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{39F83D7F-4488-4EE4-BC4D-39825CBAE531} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{B112EE1F-5C79-4ED2-95D6-F07286388C20} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{B3381A89-7A1E-418A-9873-8CDA7AFF700E} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{31627E8E-C222-440D-9375-CED0820F75D9} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{9D6A192D-2322-4FF0-A5E7-7AF53323FBCB} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{768AF09F-BB65-4B81-8F47-1E1C7C5B11E6} = {4E063457-CFB4-4EFF-AB46-99F1502B53A3}
+		{EA441540-8A7B-455A-BA9F-83598D13830F} = {981AA80F-919A-48F5-9330-2AE258723926}
+		{863CDFDD-1334-4762-B2C7-71062BFA5549} = {981AA80F-919A-48F5-9330-2AE258723926}
+	EndGlobalSection
+EndGlobal

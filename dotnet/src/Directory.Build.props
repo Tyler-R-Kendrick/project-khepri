@@ -4,5 +4,24 @@
     <PropertyGroup>
         <RootNamespace>$(RootNamespace).$(MSBuildProjectName)</RootNamespace>
     </PropertyGroup>
+
+    <!-- Agent-specific properties -->
+    <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('Khepri.Agents.'))">
+        <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:8.0</ContainerBaseImage>
+        <ContainerImageName>$(MSBuildProjectName.ToLowerInvariant().Replace('khepri.agents.', 'khepri-').Replace('.', '-'))-agent</ContainerImageName>
+    </PropertyGroup>
+
+    <!-- Agent-specific package references -->
+    <ItemGroup Condition="$(MSBuildProjectName.StartsWith('Khepri.Agents.'))">
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="Microsoft.SemanticKernel" />
+        <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" />
+    </ItemGroup>
+
+    <!-- Agent-specific project references -->
+    <ItemGroup Condition="$(MSBuildProjectName.StartsWith('Khepri.Agents.'))">
+        <ProjectReference Include="../Khepri.ServiceDefaults/Khepri.ServiceDefaults.csproj" />
+    </ItemGroup>
     
 </Project>

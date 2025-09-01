@@ -15,7 +15,8 @@
 				"genaiscript.genaiscript-vscode",
 				"PDETs-prod.AI-Powered-Authoring",
 				"ms-windows-ai-studio.microsoft-ai-tools-pack",
-				"PDETs-prod.new-module-creation"
+				"PDETs-prod.new-module-creation",
+				"ms-vscode.copilot-mermaid-diagram"
 			]
 		}
 	},

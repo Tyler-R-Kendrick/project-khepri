@@ -1,38 +1,33 @@
 <Project>
-
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
-    <ItemGroup>
+  <ItemGroup>
     <!-- .NET Aspire -->
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="8.2.2" />
     <PackageVersion Include="Aspire.Hosting.ProjectModel" Version="8.2.2" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="8.2.2" />
     <PackageVersion Include="Aspire.Dashboard.SDK" Version="8.2.2" />
-    
     <!-- ASP.NET Core -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    
     <!-- Resilience and Service Discovery -->
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.2" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-    
     <!-- OpenTelemetry -->
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
-    
     <!-- Semantic Kernel -->
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.30.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Agents.Abstractions" Version="1.30.0-alpha" />
     <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.30.0-alpha" />
-    
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.30.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.Runtime.Dapr" Version="1.30.0-alpha" />
     <!-- Code Analysis and Quality -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
@@ -40,12 +35,13 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.9" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
     <PackageVersion Include="SecurityCodeScan.VS2019" Version="5.6.7" />
-    
     <!-- Testing -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageVersion Include="xunit" Version="2.4.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
-
 </Project>

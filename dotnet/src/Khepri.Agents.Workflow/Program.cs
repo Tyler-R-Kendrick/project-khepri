@@ -1,8 +1,8 @@
 using Khepri.Khepri.Agents.Workflow.Models;
+using Khepri.Khepri.Agents.Workflow.Services;
 using Khepri.Khepri.ServiceDefaults;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
-using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Khepri.Khepri.Agents.Workflow;
 
@@ -76,6 +76,9 @@ public static class Program
             return kernelBuilder.Build();
         });
 
+        // Add Workflow Orchestration Service
+        builder.Services.AddSingleton<IWorkflowOrchestrationService, WorkflowOrchestrationService>();
+
         // Add Workflow Agent as a singleton service
         builder.Services.AddSingleton(serviceProvider =>
         {
@@ -124,50 +127,16 @@ public static class Program
         // Workflow Agent API endpoints
         app.MapPost("/api/workflow/start", async (
             StartWorkflowRequest request,
-            ChatCompletionAgent workflowAgent,
-            IHttpClientFactory httpClientFactory,
+            IWorkflowOrchestrationService orchestrationService,
             ILogger<object> logger) =>
         {
             try
             {
-                string workflowPrompt = $"""
-                    Start a modernization workflow for the following project:
-                    
-                    Project Path: {request.ProjectPath}
-                    Modernization Goals: {string.Join(", ", request.Goals)}
-                    Target Framework: {request.TargetFramework ?? "Latest .NET"}
-                    
-                    Please coordinate with the agents in the following sequence:
-                    1. Knowledge Agent - Analyze the codebase
-                    2. Planning Agent - Create modernization plan
-                    3. Development Agent - Implement changes with TDD
-                    4. User Delegation Agent - Handle approvals and feedback
-                    
-                    Return a workflow execution plan.
-                    """;
-
-                ChatHistory chatHistory = [];
-                chatHistory.AddUserMessage(workflowPrompt);
-
-                List<string> responses = [];
-                await foreach (ChatMessageContent response in workflowAgent.InvokeAsync(chatHistory))
-                {
-                    responses.Add(response.Content ?? string.Empty);
-                }
-
-                string workflowId = Guid.NewGuid().ToString();
-                object result = new
-                {
-                    WorkflowId = workflowId,
-                    AgentName = "WorkflowAgent",
-                    ExecutionPlan = string.Join("\n", responses),
-                    Status = "Started",
-                    Timestamp = DateTimeOffset.UtcNow,
-                };
+                WorkflowState result = await orchestrationService.ExecuteModernizationWorkflowAsync(request);
 
                 logger.LogInformation(
                     "Modernization workflow {WorkflowId} started for project {ProjectPath}",
-                    workflowId,
+                    result.WorkflowId,
                     request.ProjectPath);
 
                 return Results.Ok(result);
@@ -184,46 +153,29 @@ public static class Program
 
         app.MapGet("/api/workflow/status/{workflowId}", async (
             string workflowId,
-            IHttpClientFactory httpClientFactory,
+            IWorkflowOrchestrationService orchestrationService,
             ILogger<object> logger) =>
         {
             try
             {
-                // Check health of all agents
-                Dictionary<string, object> agentHealths = [];
-                string[] agentNames = ["KnowledgeAgent", "PlanningAgent", "DevelopmentAgent", "UserDelegationAgent"];
+                // Get workflow status from orchestration service
+                WorkflowState? workflowState = await orchestrationService.GetWorkflowStateAsync(workflowId);
 
-                foreach (string agentName in agentNames)
+                if (workflowState is null)
                 {
-                    try
-                    {
-                        HttpClient httpClient = httpClientFactory.CreateClient(agentName);
-                        string healthEndpoint = agentName.ToLower().Replace("agent", "-agent");
-                        HttpResponseMessage response = await httpClient.GetAsync(new Uri($"/api/{healthEndpoint.Replace("-agent", string.Empty)}/health", UriKind.Relative));
-
-                        agentHealths[agentName] = new
-                        {
-                            Status = response.IsSuccessStatusCode ? "Healthy" : "Unhealthy",
-                            StatusCode = (int)response.StatusCode,
-                        };
-                    }
-                    catch (Exception ex)
-                    {
-                        agentHealths[agentName] = new
-                        {
-                            Status = "Unreachable",
-                            Error = ex.Message,
-                        };
-                    }
+                    return Results.NotFound($"Workflow {workflowId} not found");
                 }
 
                 object result = new
                 {
-                    WorkflowId = workflowId,
-                    AgentHealths = agentHealths,
-                    OverallStatus = agentHealths.Values.All(h =>
-                        h.GetType().GetProperty("Status")?.GetValue(h)?.ToString() == "Healthy")
-                        ? "Healthy" : "Degraded",
+                    workflowState.WorkflowId,
+                    Status = workflowState.Phase.ToString(),
+                    CurrentPhase = workflowState.Phase.ToString(),
+                    workflowState.ProjectPath,
+                    workflowState.Goals,
+                    workflowState.StartTime,
+                    workflowState.CompletionTime,
+                    workflowState.Error,
                     Timestamp = DateTimeOffset.UtcNow,
                 };
 
@@ -236,7 +188,7 @@ public static class Program
             }
         })
         .WithName("GetWorkflowStatus")
-        .WithSummary("Get workflow status and agent health")
+        .WithSummary("Get workflow status and progress")
         .WithOpenApi();
 
         app.MapGet("/api/workflow/health", (ChatCompletionAgent workflowAgent) =>

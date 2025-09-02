@@ -1,8 +1,12 @@
 {
 	"name": "Multi-container Dev Environment",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "primary",
-	"workspaceFolder": "/workspace",
+	"image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/devcontainers/features/azure-cli:1": {},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/dotnet/aspire-devcontainer-feature/dotnetaspire:1": {}
+	},
 	"forwardPorts": [
 		15888,
 		16686,
@@ -14,6 +18,7 @@
 		7003,
 		7004
 	],
+    "postCreateCommand": "sudo dotnet workload install aspire",
 	"portsAttributes": {
 		"15888": {
 			"label": "Aspire Dashboard",
@@ -60,6 +65,5 @@
 				"ms-vscode.copilot-mermaid-diagram"
 			]
 		}
-	},
-	"postStartCommand": "bash .devcontainer/install-dependencies.sh"
+	}
 }

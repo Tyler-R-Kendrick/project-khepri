@@ -10,6 +10,8 @@
     <PackageVersion Include="Aspire.Dashboard.SDK" Version="8.2.2" />
     <!-- ASP.NET Core -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.64.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.64.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <!-- Resilience and Service Discovery -->
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
@@ -23,14 +25,17 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
     <!-- Semantic Kernel -->
-    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.30.0" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Abstractions" Version="1.30.0-alpha" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.30.0-alpha" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.30.0-alpha" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Process.Runtime.Dapr" Version="1.30.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.Abstractions" Version="1.64.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.Core" Version="1.64.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.64.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.64.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
     <!-- Code Analysis and Quality -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.9" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />

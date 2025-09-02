@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);SA0002</NoWarn>
   </PropertyGroup>
+
+  <!-- Package references and project references are inherited from Directory.Build.props -->
 
 </Project>

@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireSharedProject>true</IsAspireSharedProject>
+    <NoWarn>$(NoWarn);SA0002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,6 +3,47 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "primary",
 	"workspaceFolder": "/workspace",
+	"forwardPorts": [
+		15888,
+		16686,
+		5000,
+		5001,
+		7000,
+		7001,
+		7002,
+		7003,
+		7004
+	],
+	"portsAttributes": {
+		"15888": {
+			"label": "Aspire Dashboard",
+			"onAutoForward": "openBrowser"
+		},
+		"16686": {
+			"label": "OpenTelemetry Collector"
+		},
+		"5000": {
+			"label": "HTTP Services"
+		},
+		"5001": {
+			"label": "HTTPS Services"
+		},
+		"7000": {
+			"label": "Knowledge Agent"
+		},
+		"7001": {
+			"label": "Planning Agent"
+		},
+		"7002": {
+			"label": "Development Agent"
+		},
+		"7003": {
+			"label": "User Delegation Agent"
+		},
+		"7004": {
+			"label": "Workflow Agent"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [

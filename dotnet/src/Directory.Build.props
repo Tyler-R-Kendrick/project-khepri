@@ -11,6 +11,17 @@
         <ContainerImageName>$(MSBuildProjectName.ToLowerInvariant().Replace('khepri.agents.', 'khepri-').Replace('.', '-'))-agent</ContainerImageName>
     </PropertyGroup>
 
+    <!-- Code Analysis packages for all source projects -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+        <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="Roslynator.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" />
+        <PackageReference Include="SecurityCodeScan.VS2019" PrivateAssets="all" />
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)../stylecop.json" />
+    </ItemGroup>
+
     <!-- Agent-specific package references -->
     <ItemGroup Condition="$(MSBuildProjectName.StartsWith('Khepri.Agents.'))">
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />

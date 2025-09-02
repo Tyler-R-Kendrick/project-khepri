@@ -1,10 +1,11 @@
+using Khepri.Khepri.ServiceDefaults;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 
 #pragma warning disable SKEXP0110 // ChatCompletionAgent is experimental
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add Aspire service defaults (observability, health checks, etc.)
 builder.AddServiceDefaults();
@@ -14,16 +15,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure Semantic Kernel with AI services
-builder.Services.AddSingleton<Kernel>(serviceProvider =>
+builder.Services.AddSingleton(serviceProvider =>
 {
-    var kernelBuilder = Kernel.CreateBuilder();
-    
+    IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
+
     // TODO: Configure AI service (Azure OpenAI, OpenAI, etc.)
     // This will be configured through environment variables or configuration
-    var aiEndpoint = builder.Configuration["AI:Endpoint"];
-    var aiKey = builder.Configuration["AI:ApiKey"];
-    var deploymentName = builder.Configuration["AI:DeploymentName"];
-    
+    string? aiEndpoint = builder.Configuration["AI:Endpoint"];
+    string? aiKey = builder.Configuration["AI:ApiKey"];
+    string? deploymentName = builder.Configuration["AI:DeploymentName"];
+
     if (!string.IsNullOrEmpty(aiEndpoint) && !string.IsNullOrEmpty(aiKey) && !string.IsNullOrEmpty(deploymentName))
     {
         kernelBuilder.AddAzureOpenAIChatCompletion(
@@ -36,15 +37,15 @@ builder.Services.AddSingleton<Kernel>(serviceProvider =>
         // Fallback to mock or development service
         Console.WriteLine("AI configuration not found. Running in development mode.");
     }
-    
+
     return kernelBuilder.Build();
 });
 
 // Add Knowledge Agent as a singleton service
-builder.Services.AddSingleton<ChatCompletionAgent>(serviceProvider =>
+builder.Services.AddSingleton(serviceProvider =>
 {
-    var kernel = serviceProvider.GetRequiredService<Kernel>();
-    
+    Kernel kernel = serviceProvider.GetRequiredService<Kernel>();
+
     return new ChatCompletionAgent
     {
         Name = "KnowledgeAgent",
@@ -66,12 +67,12 @@ builder.Services.AddSingleton<ChatCompletionAgent>(serviceProvider =>
         Arguments = new KernelArguments(new Dictionary<string, object?>
         {
             { "max_tokens", 4000 },
-            { "temperature", 0.1 } // Low temperature for consistent analysis
-        })
+            { "temperature", 0.1 }, // Low temperature for consistent analysis
+        }),
     };
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Map Aspire default endpoints (health checks, metrics, etc.)
 app.MapDefaultEndpoints();
@@ -93,7 +94,7 @@ app.MapPost("/api/knowledge/analyze", async (
 {
     try
     {
-        var analysisPrompt = $"""
+        string analysisPrompt = $"""
             Analyze the following code and extract knowledge assets:
             
             {codeInput}
@@ -106,20 +107,20 @@ app.MapPost("/api/knowledge/analyze", async (
             """;
 
         // Create chat history for the agent
-        var chatHistory = new ChatHistory();
+        ChatHistory chatHistory = [];
         chatHistory.AddUserMessage(analysisPrompt);
 
-        var responses = new List<string>();
-        await foreach (var response in knowledgeAgent.InvokeAsync(chatHistory))
+        List<string> responses = [];
+        await foreach (ChatMessageContent response in knowledgeAgent.InvokeAsync(chatHistory))
         {
-            responses.Add(response.Content ?? "");
+            responses.Add(response.Content ?? string.Empty);
         }
 
-        var result = new
+        object result = new
         {
             AgentName = "KnowledgeAgent",
             Analysis = string.Join("\n", responses),
-            Timestamp = DateTimeOffset.UtcNow
+            Timestamp = DateTimeOffset.UtcNow,
         };
 
         logger.LogInformation("Knowledge analysis completed for input of length {Length}", codeInput.Length);
@@ -141,7 +142,7 @@ app.MapGet("/api/knowledge/health", (ChatCompletionAgent knowledgeAgent) =>
     {
         AgentName = knowledgeAgent.Name,
         Status = "Healthy",
-        Timestamp = DateTimeOffset.UtcNow
+        Timestamp = DateTimeOffset.UtcNow,
     });
 })
 .WithName("GetKnowledgeAgentHealth")

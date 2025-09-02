@@ -28,6 +28,15 @@
         </TargetProjectPath>
     </PropertyGroup>
 
+    <!-- Code Analysis packages for test projects -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+        <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="Roslynator.Analyzers" PrivateAssets="all" />
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)../stylecop.json" />
+    </ItemGroup>
+
     <!-- Add the reference for every test project -->
     <ItemGroup Condition="'$(IsTestProject)' == 'true'">
         <ProjectReference Include="$(TargetProjectPath)" />

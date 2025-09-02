@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureAIInference" />
     <PackageReference Include="Microsoft.SemanticKernel.Process.Abstractions" />
     <PackageReference Include="Microsoft.SemanticKernel.Process.Core" />
     <PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" />

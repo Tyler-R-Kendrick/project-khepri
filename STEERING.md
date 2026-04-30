@@ -5,3 +5,4 @@ All Project Khepri custom agents must read this file before phase work and apply
 ## Learned Corrections
 
 - 2026-04-30: ---- *This section includes details on the pull request with code changes you have already submitted to fix the problem above.* <pr_title> [codex] Add GitHub custom agents and eval coverage </pr_title> <pr_description> ## Summary - Adds... Evidence: captured from user correction.
+- 2026-04-30: ---- *This section includes details on the pull request with code changes you have already submitted to fix the problem above.* <pr_title> Docs </pr_title> <pr_description> &gt; [!NOTE] &gt; **Medium Risk** &gt; Introduces new repository... Evidence: captured from user correction.

@@ -1,0 +1,4 @@
+targets:
+  - name: default
+    provider: mock
+    response: "Mock response; deterministic code-graders inspect repository files."

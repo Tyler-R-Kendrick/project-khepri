@@ -1,0 +1,200 @@
+description: Project Khepri GitHub custom agent profile evaluation
+tags:
+  - khepri
+  - github-custom-agents
+  - agent-evals
+
+tests:
+  - id: profile-schema
+    criteria: All Project Khepri GitHub custom agents exist with valid frontmatter, prompts, and supported GitHub Copilot tool aliases.
+    input: Inspect .github/agents for Project Khepri custom agent profiles.
+    expected_output:
+      agent_profiles:
+        - khepri-orchestrator
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-planner
+        - khepri-scaffold
+        - khepri-code
+        - khepri-test
+        - khepri-modernization-assessor
+        - khepri-evolution
+    assertions:
+      - name: profile-schema
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: profile-schema
+
+  - id: orchestration-subagents
+    criteria: The orchestration agent can invoke subagents, starts khepri-evolution as a continuous companion, and encodes the modernization sequence from the docs branch.
+    input: Inspect the orchestrator profile for subagent delegation, parallel evolution, and phase order.
+    expected_output:
+      required_sequence:
+        - khepri-evolution
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-planner
+        - khepri-scaffold
+        - khepri-code
+        - khepri-test
+        - khepri-modernization-assessor
+      parallel_companion: khepri-evolution
+    assertions:
+      - name: orchestration-subagents
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: orchestration-subagents
+
+  - id: agent-frontmatter-lint
+    criteria: Agent frontmatter uses the official handoffs object syntax and passes repository lint rules for names, targets, tools, and handoff contracts.
+    input: Run the Project Khepri custom-agent frontmatter linter.
+    expected_output:
+      handoffs_schema:
+        - label
+        - agent
+        - prompt
+        - send
+      lint_script: scripts/lint-agent-frontmatter.mjs
+      enforced_fields:
+        - name
+        - description
+        - target
+        - tools
+        - handoffs
+    assertions:
+      - name: agent-frontmatter-lint
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: agent-frontmatter-lint
+
+  - id: bounded-agent-contracts
+    criteria: Every bounded-domain agent defines inputs, outputs, guardrails, and handoffs so the flow is repeatable.
+    input: Inspect all custom agent prompts for explicit operating contracts.
+    expected_output:
+      required_sections:
+        - Inputs
+        - Outputs
+        - Guardrails
+        - Handoffs
+    assertions:
+      - name: bounded-agent-contracts
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: bounded-agent-contracts
+
+  - id: least-privilege-tools
+    criteria: Agent tool access matches each role's write and execution responsibilities.
+    input: Inspect each custom agent frontmatter tools list.
+    expected_output:
+      policy: Read-only agents do not get edit or execute tools; implementation agents get only the write or shell tools they need.
+    assertions:
+      - name: least-privilege-tools
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: least-privilege-tools
+
+  - id: docs-branch-flow-coverage
+    criteria: The custom agents cover the full modernization flow captured in the docs branch README sequence diagram.
+    input: Compare custom agent prompts to the docs branch modernization phases.
+    expected_output:
+      phases:
+        - legacy system IR collection
+        - legacy knowledge indexing
+        - regression suite planning
+        - regression suite generation
+        - regression suite execution
+        - target system knowledge indexing
+        - target scaffolding
+        - minimal type scaffold
+        - target tests
+        - test feedback implementation
+        - modernization assessment
+        - agent skills
+        - continuous evolution
+        - parallel improvement
+        - steering
+    assertions:
+      - name: docs-branch-flow-coverage
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: docs-branch-flow-coverage
+
+  - id: evolution-agent
+    criteria: The khepri-evolution custom agent manages project agent skills, hooks, steering, and modernization-improvement recommendations in adherence to agentskills.io.
+    input: Inspect .github/agents/khepri-evolution.md.
+    expected_output:
+      agent_profile: khepri-evolution
+      responsibilities:
+        - create and improve agent skills
+        - run alongside all other agent work as a continuous improvement companion
+        - suggest agents, skills, MCPs, tools, hooks, plugins, instructions, prompts, and workflows that improve modernization outcomes
+        - use the official Awesome Copilot MCP server as a configured tool
+        - follow agentskills.io SKILL.md constraints
+        - maintain learn skill and hook
+        - preserve STEERING.md
+      mcp_tool: awesome-copilot/*
+    assertions:
+      - name: evolution-agent
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent
+
+  - id: learn-skill-hook
+    criteria: The learn agent skill and GitHub hook capture user corrections as succinct generalized steering.
+    input: Inspect .github/skills/learn and .github/hooks/learn.json.
+    expected_output:
+      skill: .github/skills/learn/SKILL.md
+      hook: .github/hooks/learn.json
+      target: STEERING.md
+    assertions:
+      - name: learn-skill-hook
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: learn-skill-hook
+
+  - id: steering-consumption
+    criteria: All Khepri custom agents use STEERING.md so chat corrections affect future work.
+    input: Inspect STEERING.md and every .github/agents profile.
+    expected_output:
+      steering_file: STEERING.md
+      all_agents_reference_steering: true
+    assertions:
+      - name: steering-consumption
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: steering-consumption
+
+  - id: agent-skills-spec-compliance
+    criteria: The learn project skill follows the Agent Skills specification from agentskills.io.
+    input: Validate the learn skill folder structure, frontmatter, and concise body.
+    expected_output:
+      project_skill_root: .github/skills
+      required_file: SKILL.md
+      required_frontmatter:
+        - name
+        - description
+    assertions:
+      - name: agent-skills-spec-compliance
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: agent-skills-spec-compliance

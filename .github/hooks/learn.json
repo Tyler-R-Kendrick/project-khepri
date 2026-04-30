@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/learn.mjs",
+        "powershell": "node .github/hooks/scripts/learn.mjs",
+        "cwd": ".",
+        "timeoutSec": 10,
+        "comment": "learn: capture user corrections into STEERING.md"
+      }
+    ]
+  }
+}

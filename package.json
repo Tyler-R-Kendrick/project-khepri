@@ -14,6 +14,9 @@
     "skills-ref": "0.1.5",
     "yaml": "^2.8.1"
   },
+  "engines": {
+    "node": ">=20.12"
+  },
   "overrides": {
     "@anthropic-ai/sdk": "0.91.1"
   }

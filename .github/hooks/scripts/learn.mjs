@@ -3,20 +3,14 @@ import path from "node:path";
 import process from "node:process";
 
 const correctionSignals = [
-  /\bactually\b/i,
   /\bcorrection\b/i,
-  /\bdo not\b/i,
-  /\bdon't\b/i,
-  /\balways\b/i,
-  /\bnever\b/i,
-  /\binstead\b/i,
   /\bshould have\b/i,
   /\bwhen i say\b/i,
   /\bfrom now on\b/i,
-  /\bremember\b/i,
-  /\bwrong\b/i,
   /\bnot what i asked\b/i,
-  /\btry again\b/i
+  /\byou previously\b/i,
+  /\binstead of what you did\b/i,
+  /^\/learn\b/i
 ];
 
 function readStdin() {
@@ -74,7 +68,14 @@ function generalize(prompt) {
     text += ".";
   }
 
-  return text.charAt(0).toUpperCase() + text.slice(1);
+  const result = text.charAt(0).toUpperCase() + text.slice(1);
+
+  // Require at least one word with 3+ letters to avoid writing meaningless entries.
+  if (!/[A-Za-z]{3,}/.test(result)) {
+    return null;
+  }
+
+  return result;
 }
 
 function steeringTemplate() {
@@ -116,6 +117,10 @@ if (!prompt || !isCorrection(prompt)) {
 
 const steeringPath = process.env.LEARN_STEERING_PATH || path.resolve(payload.cwd || process.cwd(), "STEERING.md");
 const correction = generalize(prompt);
+if (!correction) {
+  console.log(JSON.stringify({ status: "ignored", reason: "generalized text contained no meaningful content" }));
+  process.exit(0);
+}
 const result = appendSteering(steeringPath, correction, payload.timestamp);
 
 console.log(JSON.stringify({ status: result.changed ? "captured" : "ignored", reason: result.reason, steeringPath }));

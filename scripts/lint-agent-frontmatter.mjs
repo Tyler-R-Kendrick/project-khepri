@@ -304,8 +304,10 @@ function normalizeTools(value) {
   return [];
 }
 
+const allowedNamespacePrefixes = ["github/", "awesome-copilot/", "playwright/"];
+
 function hasAllowedToolName(tool) {
-  return allowedTools.has(tool) || /^[a-z0-9-]+\/[\w*-]+$/i.test(tool);
+  return allowedTools.has(tool) || allowedNamespacePrefixes.some((prefix) => tool.startsWith(prefix));
 }
 
 function sameArray(actual, expected) {

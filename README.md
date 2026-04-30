@@ -1,19 +1,69 @@
 # Project Khepri
-A AI-driven code modernization framework for legacy codebases.
+An AI-driven code modernization framework for legacy codebases.
 
 ## Goal
 The goal of this project is to provide an opinionated agent-driven process to produce high-quality modernized code from a legacy system.
+
+## Current Agent System
+Project Khepri now includes repository-level GitHub Copilot custom agents in `.github/agents` that formalize the modernization workflow. These agents are tested with AgentEvals/AgentV and linted to keep their frontmatter compatible with GitHub custom-agent configuration.
+
+The active custom agents are:
+
+- `khepri-orchestrator`: coordinates the modernization sequence and starts the continuous improvement loop.
+- `khepri-evolution`: runs alongside all other agent work as the continuous improvement companion.
+- `khepri-spec`: collects and generates intermediary representations.
+- `khepri-knowledge`: indexes IR, business context, standards, and verification results.
+- `khepri-planner`: creates approval-ready regression, scaffolding, test, and implementation plans.
+- `khepri-scaffold`: executes approved scaffolding and minimal type-signature plans.
+- `khepri-code`: writes tests first, implements target behavior, and handles test feedback.
+- `khepri-test`: runs reproducible verification commands.
+- `khepri-modernization-assessor`: checks parity, risk, and acceptance evidence.
+
+`khepri-evolution` is intentionally started before phase-specific work. It watches handoffs, evidence, failures, and user corrections so agent skills, hooks, evals, steering, MCP suggestions, and other workflow assets improve while modernization work is happening.
+
+User corrections are captured through the `learn` Agent Skill in `.github/skills/learn` and the `learn` GitHub hook in `.github/hooks/learn.json`. The generalized correction is stored in `STEERING.md`, which every Khepri agent reads before phase work.
+
+`khepri-evolution` also has the official Awesome Copilot MCP server configured as `awesome-copilot/*`. It uses that server to recommend agents, skills, MCPs, tools, hooks, plugins, instructions, prompts, workflows, and other Copilot customizations that could improve modernization outcomes. Recommendations remain advisory until the user approves a candidate to inspect, install, or adapt.
+
+See `docs/agents/README.md` for the full custom-agent contract and verification commands.
 
 ## The Approach
 The approach we will be implementing relies on several tools to be developed that produce intermediary representations of the code base so LLMs can have greater context and feedback loops as heuristics to inform their migration/modernization strategy. Below, we outline the tools identified to produce the emergent, catalytics capabilities of an AI modernization agent.
 
 ### Flow
-To make the flow easy to debug, iterate on, and extend - we will build out multiple agents as part of an agentic workflow.
-The workflow itself will be static, but each step will be orchestrated by an agent responsible for that phase of development.
+To make the flow easy to debug, iterate on, and extend, Project Khepri uses multiple bounded agents as part of an agentic workflow.
+The phase sequence is static, but each step is handled by an agent responsible for that phase of development.
+`khepri-evolution` runs in parallel with every phase so the workflow itself improves as the agents do work.
 Each agent should be enabled with A2A so that it could be reused across agent-enabled products.
-Each collection of agent capabilities with a distinct bounded domain concern should be exposed as an MCP server to maximize reuse.
+Each collection of agent capabilities with a distinct bounded-domain concern should be exposed as an MCP server to maximize reuse.
 
-Below, is an example of this process flow:
+At the current repository level, the GitHub custom-agent flow is:
+```mermaid
+sequenceDiagram
+    participant user as User
+    participant orch as Khepri<br/>Orchestrator
+    participant evo as Khepri<br/>Evolution
+    participant spec as Spec<br/>Agent
+    participant know as Knowledge<br/>Agent
+    participant plan as Planning<br/>Agent
+    participant scaffold as Scaffold<br/>Agent
+    participant code as Code<br/>Agent
+    participant test as Test<br/>Agent
+    participant assess as Modernization<br/>Assessor
+
+    user->>orch: request modernization
+    orch->>evo: start continuous improvement companion
+    orch->>spec: collect or generate IR
+    orch->>know: index IR and business context
+    orch->>plan: create approval-ready plan
+    orch->>scaffold: execute approved scaffold
+    orch->>code: write tests first and implement
+    orch->>test: run verification
+    orch->>assess: assess parity, risk, and acceptance
+    evo-->>orch: suggest approved improvements to agents, skills, hooks, MCPs, evals, and steering
+```
+
+Below is the earlier conceptual process flow:
 ```mermaid
 sequenceDiagram
     participant orch as Orchestrator
@@ -36,6 +86,7 @@ sequenceDiagram
     participant code as Code<br/>Agent
     participant test as Test<br/>Agent
     participant assess as Mod<br/>Assess
+    participant evo as Evolution<br/>Agent
     participant user as User
     participant legacy as Legacy<br/>System
     participant modern as Modern<br/>System
@@ -43,6 +94,7 @@ sequenceDiagram
     participant scaffold as Scaffolding<br/>Agent
 
     user->>orch: request modernization of legacy system.
+    orch->>evo: start continuous workflow improvement.
     %% build knowledge index of legacy system.
     orch->>spec: request collection/generation of IR on legacy system.
     spec->>legacy: collect/generate IR of source code
@@ -123,7 +175,24 @@ sequenceDiagram
     user-->>code: approve code
     code->>modern: refactor code
     code-->>orch: notify code refactored
+    evo-->>orch: recommend approved agent, skill, hook, MCP, eval, and steering improvements.
 
+```
+
+## Verification
+Agent profiles and workflow contracts are validated with:
+
+```powershell
+npm run lint:agents
+npm run eval:agents:validate
+npm run eval:agents
+npm run skills:validate
+```
+
+The .NET smoke test currently runs with:
+
+```powershell
+$env:DOTNET_ROLL_FORWARD='Major'; dotnet test dotnet\tests\Code2\NL\Code2NL.Tests.csproj
 ```
 
 ### Tools

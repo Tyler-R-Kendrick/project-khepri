@@ -31,6 +31,16 @@ The purpose of these records is to document the reasoning behind the decisions, 
 - **MCP**: We will leverage MCP to expose capabilities as tools/prompts/resources for reuse as MCP servers.
 - **OTLP**: We will leverage OTLP to expose telemetry data to the Khepri project. This decision was made to leverage the capabilities of OTLP for building and managing telemetry data, which is a key component of the Khepri project.
 - **A2A**: For agents, we will leverage A2A for discoverability and orchestration.
+- **GitHub Copilot custom agents**: The repository now uses `.github/agents` profiles to encode the Khepri modernization workflow. Agent frontmatter declares tools, MCP servers, and official `handoffs` so orchestration is machine-checkable instead of only described in prose.
+- **Agent Skills**: The repository uses `.github/skills` for reusable agent behavior. The `learn` skill and matching hook capture user corrections as generalized steering in `STEERING.md`.
+- **AgentEvals/AgentV**: The custom-agent system is validated with AgentEvals/AgentV so profile structure, orchestration, `khepri-evolution`, `learn`, and steering behavior have executable checks.
+
+#### Agent Workflow Decisions
+
+- **Bounded phase agents**: Modernization work is split across spec, knowledge, planning, scaffolding, coding, test, and assessment agents. Each agent owns a narrow responsibility and has least-privilege tool access.
+- **Continuous evolution**: `khepri-evolution` runs alongside all other agent work as a continuous improvement companion. It watches handoffs, evidence, failures, and user corrections, then suggests or implements approved improvements to agents, skills, hooks, MCPs, evals, and steering.
+- **Awesome Copilot MCP**: `khepri-evolution` has the official Awesome Copilot MCP server configured as `awesome-copilot/*` so it can recommend reusable Copilot agents, skills, instructions, prompts, hooks, plugins, MCPs, tools, and workflows for better modernization outcomes.
+- **Steering over repetition**: User corrections should be generalized into `STEERING.md` through the `learn` skill and hook so all agents can avoid repeating the same mistake.
 
 #### Documentation
 

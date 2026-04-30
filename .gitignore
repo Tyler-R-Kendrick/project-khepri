@@ -291,6 +291,10 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# AgentV local evaluation run output
+.agentv/cache.json
+.agentv/results/
+
 # Visual Studio 6 build log
 *.plg
 

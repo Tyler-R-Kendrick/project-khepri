@@ -1,0 +1,23 @@
+{
+  "name": "project-khepri-agent-evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval:agents": "agentv eval run evals/github-agents/khepri-github-agents.eval.yaml --dry-run --threshold 1 --workers 1",
+    "eval:agents:validate": "agentv validate evals/github-agents/khepri-github-agents.eval.yaml --max-warnings 0",
+    "lint:agents": "node scripts/lint-agent-frontmatter.mjs",
+    "preeval:agents": "npm run lint:agents",
+    "skills:validate": "skills-ref validate .github/skills/learn"
+  },
+  "devDependencies": {
+    "agentv": "4.24.1",
+    "skills-ref": "0.1.5",
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "overrides": {
+    "@anthropic-ai/sdk": "0.91.1"
+  }
+}

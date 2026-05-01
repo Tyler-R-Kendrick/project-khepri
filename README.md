@@ -19,7 +19,11 @@ The active custom agents are:
 - `khepri-test`: runs reproducible verification commands.
 - `khepri-modernization-assessor`: checks parity, risk, and acceptance evidence.
 
-`khepri-evolution` is intentionally started before phase-specific work. It watches handoffs, evidence, failures, and user corrections so agent skills, hooks, evals, steering, MCP suggestions, and other workflow assets improve while modernization work is happening.
+`khepri-evolution` is intentionally started before phase-specific work. It watches handoffs, evidence, failures, and user corrections so agents, agent skills, hooks, evals, steering, MCP suggestions, and other workflow assets improve while modernization work is happening.
+
+When modernization work repeatedly depends on a particular legacy or target tech stack, `khepri-evolution` can create or refine techstack-specific agents, techstack-specific skills, hooks, MCP servers, and knowledge packets. Those specialists capture how to install, run, simulate, emulate, and test the legacy and target systems so later phases build on evidence instead of rediscovering runtime behavior.
+
+Evolution-agent changes use several small AgentV-backed improvement iterations where possible. The agent now records hypotheses, baseline and candidate scores, red and green commands, exit status, artifacts, rollback plans, and specialist artifact checklists so new experts remain testable, maintainable, and safely scoped.
 
 User corrections are captured through the `learn` Agent Skill in `.github/skills/learn` and the `learn` GitHub hook in `.github/hooks/learn.json`. The generalized correction is stored in `STEERING.md`, which every Khepri agent reads before phase work.
 

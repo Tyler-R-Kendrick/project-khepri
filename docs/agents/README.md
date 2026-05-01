@@ -11,7 +11,7 @@ The profiles formalize the docs-branch modernization flow as bounded subagents:
 - `khepri-code` writes tests first, implements behavior, and handles test feedback.
 - `khepri-test` runs reproducible verification commands.
 - `khepri-modernization-assessor` checks parity, risk, and acceptance evidence.
-- `khepri-evolution` creates and improves project Agent Skills, hooks, evals, and steering.
+- `khepri-evolution` creates and improves project agents, Agent Skills, hooks, MCP servers, evals, steering, and techstack-specific modernization expertise.
 
 ## Current Execution Model
 
@@ -46,6 +46,28 @@ the agent system getting better while modernization work proceeds.
 hooks, plugins, instructions, prompts, workflows, and other Copilot customizations
 that could improve modernization outcomes. Recommendations stay advisory until the
 user approves a specific candidate to inspect, install, or adapt.
+
+When repeated modernization work depends on a particular legacy or target stack,
+`khepri-evolution` is responsible for proposing or creating durable specialization:
+techstack-specific agents for bounded expert roles, techstack-specific skills for
+repeatable procedures, hooks for deterministic automation, and MCP servers for
+reusable tool access. Each specialist should maintain knowledge packets and runtime
+runbooks that cover installation commands, test commands, real runtime execution,
+simulation harnesses, emulation harnesses, parity checks, and acceptance evidence.
+AgentV evidence should drive whether specialists are expanded, retired, merged, or
+narrowed.
+
+Evolution changes are expected to proceed in several small improvement iterations
+when the workflow gap is not obvious. Each iteration records a hypothesis, expected
+score movement, baseline and candidate scores, changed files, rollback plan, stop
+condition, residual risk, and next experiment. AgentV TDD evidence should include
+the red command and green command, exit status, focused check, artifact path when
+available, and broader validation command without weakening assertions.
+
+When `khepri-evolution` creates a specialist surface, it should use explicit
+artifact checklists: agent profile checklist, skill authoring checklist, hook
+automation checklist, MCP server contract, shared evaluation scenarios, security
+review, maintenance owner, and deprecation signal.
 
 All agents read `STEERING.md` before phase work. User corrections are captured by the
 `learn` Agent Skill in `.github/skills/learn` and the `learn` GitHub hook in

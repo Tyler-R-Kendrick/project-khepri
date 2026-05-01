@@ -192,6 +192,81 @@ tests:
         config:
           check: evolution-agent-agentv-tdd
 
+  - id: evolution-agent-iteration-discipline
+    criteria: The khepri-evolution custom agent manages improvement iterations with explicit hypotheses, score tracking, stop conditions, rollback plans, and next experiments.
+    input: Inspect .github/agents/khepri-evolution.md for a repeatable iteration discipline beyond a single red/green pass.
+    expected_output:
+      agent_profile: khepri-evolution
+      workflow:
+        - maintain an improvement backlog
+        - record each iteration hypothesis and expected score movement
+        - compare baseline and candidate scores
+        - list changed files and rollback plan
+        - stop when the condition is met and name residual risk or next experiment
+    assertions:
+      - name: evolution-agent-iteration-discipline
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent-iteration-discipline
+
+  - id: evolution-agent-tdd-evidence
+    criteria: The khepri-evolution custom agent requires red and green AgentV evidence with commands, exit status, artifact paths, focused checks, broader validation, and unchanged assertion strength.
+    input: Inspect .github/agents/khepri-evolution.md for evidence reporting requirements in the agent-implementation TDD loop.
+    expected_output:
+      agent_profile: khepri-evolution
+      workflow:
+        - update scenario before implementation
+        - capture red command and red evidence showing expected failure
+        - capture green command, exit status, and artifact path
+        - run focused check before broader validation
+        - do not weaken assertions just to pass
+    assertions:
+      - name: evolution-agent-tdd-evidence
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent-tdd-evidence
+
+  - id: evolution-agent-techstack-specialization
+    criteria: The khepri-evolution custom agent can create and refine techstack-specific agents, skills, hooks, MCP servers, and runtime knowledge for legacy-to-target modernization work.
+    input: Inspect .github/agents/khepri-evolution.md for specialist creation, legacy and target runtime learning, and simulation/emulation/test guidance.
+    expected_output:
+      agent_profile: khepri-evolution
+      responsibilities:
+        - create techstack-specific agents and skills when repeated modernization work needs specialist expertise
+        - create hooks and MCP servers when deterministic automation or reusable tool access is needed
+        - maintain legacy and target system knowledge packets with install, run, simulate, emulate, and test commands
+        - iterate specialists from AgentV evidence and retire or narrow them when they stop helping
+    assertions:
+      - name: evolution-agent-techstack-specialization
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent-techstack-specialization
+
+  - id: evolution-agent-specialist-artifact-coverage
+    criteria: The khepri-evolution custom agent defines complete artifact coverage for durable specialists across agent profiles, skills, hooks, MCP servers, evaluation scenarios, security review, maintenance, and deprecation.
+    input: Inspect .github/agents/khepri-evolution.md for required checklists before creating techstack-specific durable surfaces.
+    expected_output:
+      agent_profile: khepri-evolution
+      required_artifacts:
+        - agent profile checklist with tools and handoff owner
+        - skill authoring checklist with invocation examples
+        - hook automation checklist
+        - MCP server contract with tool access model
+        - evaluation scenarios, security review, maintenance owner, and deprecation signal
+    assertions:
+      - name: evolution-agent-specialist-artifact-coverage
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent-specialist-artifact-coverage
+
   - id: tdd-agents-agent-evals
     criteria: The khepri-code and khepri-test custom agents enforce red/green/refactor AgentEvals evidence for agent prompt/profile implementation changes.
     input: Inspect .github/agents/khepri-code.md and .github/agents/khepri-test.md for AgentV-backed TDD behavior.

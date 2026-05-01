@@ -174,7 +174,7 @@ function loadProfiles() {
 
   const profiles = new Map();
   for (const fileName of readdirSync(dir)) {
-    if (!fileName.endsWith(".md")) {
+    if (!fileName.endsWith(".md") || fileName.endsWith(".agent.md")) {
       continue;
     }
 
@@ -210,6 +210,19 @@ function hasPhrase(text, phrase) {
 
 function readTextIfExists(filePath) {
   return existsSync(filePath) ? readFileSync(filePath, "utf8").replace(/\r\n/g, "\n") : null;
+}
+
+function readYamlIfExists(filePath) {
+  const text = readTextIfExists(filePath);
+  if (text === null) {
+    return { exists: false, data: null, parseError: "missing" };
+  }
+
+  try {
+    return { exists: true, data: YAML.parse(text) ?? {}, parseError: null };
+  } catch (error) {
+    return { exists: true, data: null, parseError: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 function loadLearnSkill() {
@@ -462,6 +475,135 @@ function checkEvolutionAgent(state) {
   return assertions;
 }
 
+function checkSpecAgentEvalContract(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-spec");
+  assertions.push(assertion("khepri-spec profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "AgentEvals",
+    "AgentV",
+    "EVAL.yaml",
+    "agent implementation",
+    "acceptance criteria",
+    "test scenarios",
+    "code-grader",
+    "expected red signal",
+    "before prompt or profile changes"
+  ]) {
+    assertions.push(assertion(`khepri-spec covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkEvolutionAgentAgentvTdd(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-evolution");
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "AgentEvals",
+    "AgentV",
+    "TDD",
+    "write scenarios first",
+    "baseline",
+    "candidate",
+    "compare",
+    "review failures",
+    "one targeted improvement",
+    "no new regressions",
+    "re-run and iterate"
+  ]) {
+    assertions.push(assertion(`khepri-evolution covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkTddAgentsAgentEvals(state) {
+  const assertions = [];
+  const code = state.profiles.get("khepri-code");
+  const test = state.profiles.get("khepri-test");
+  assertions.push(assertion("khepri-code profile exists", Boolean(code), code?.filePath));
+  assertions.push(assertion("khepri-test profile exists", Boolean(test), test?.filePath));
+
+  if (code) {
+    for (const phrase of [
+      "AgentEvals",
+      "AgentV",
+      "failing eval",
+      "code-grader",
+      "RED",
+      "GREEN",
+      "smallest prompt or profile change",
+      "red/green evidence"
+    ]) {
+      assertions.push(assertion(`khepri-code covers ${phrase}`, hasPhrase(code.prompt, phrase), phrase));
+    }
+  }
+
+  if (test) {
+    for (const phrase of [
+      "AgentEvals",
+      "AgentV",
+      "agentv validate",
+      "agentv eval",
+      "red/green evidence",
+      "exit code",
+      "focused rerun",
+      "broader validation"
+    ]) {
+      assertions.push(assertion(`khepri-test covers ${phrase}`, hasPhrase(test.prompt, phrase), phrase));
+    }
+  }
+
+  return assertions;
+}
+
+function checkRequestedToolingInstallation() {
+  const root = repoRoot();
+  const assertions = [];
+  const requiredSkillPaths = [
+    [".agents skill sensei exists", path.join(root, ".agents", "skills", "sensei", "SKILL.md")],
+    [".agents skill editorconfig exists", path.join(root, ".agents", "skills", "editorconfig", "SKILL.md")],
+    [".agents skill microsoft-skill-creator exists", path.join(root, ".agents", "skills", "microsoft-skill-creator", "SKILL.md")],
+    [".agents skill create-architectural-decision-record exists", path.join(root, ".agents", "skills", "create-architectural-decision-record", "SKILL.md")],
+    ["ADR generator agent artifact exists", path.join(root, ".agents", "agents", "adr-generator.agent.md")],
+    ["form-builder APM skill exists", path.join(root, ".github", "skills", "form-builder", "SKILL.md")],
+    ["APM compiled AGENTS.md exists", path.join(root, "AGENTS.md")]
+  ];
+
+  for (const [text, filePath] of requiredSkillPaths) {
+    assertions.push(assertion(text, existsSync(filePath), filePath));
+  }
+
+  const apmConfigPath = path.join(root, "apm.yml");
+  const apmConfig = readYamlIfExists(apmConfigPath);
+  assertions.push(assertion("apm.yml exists", apmConfig.exists, apmConfigPath));
+  assertions.push(assertion("apm.yml parses", apmConfig.exists && !apmConfig.parseError, apmConfig.parseError ?? "ok"));
+  const apmDeps = apmConfig.data?.dependencies?.apm ?? [];
+  assertions.push(assertion("apm.yml includes danielmeppiel/form-builder", Array.isArray(apmDeps) && apmDeps.includes("danielmeppiel/form-builder"), JSON.stringify(apmDeps)));
+
+  const allagentsPath = path.join(root, ".allagents", "workspace.yaml");
+  const allagents = readYamlIfExists(allagentsPath);
+  assertions.push(assertion("allagents workspace exists", allagents.exists, allagentsPath));
+  assertions.push(assertion("allagents workspace parses", allagents.exists && !allagents.parseError, allagents.parseError ?? "ok"));
+  assertions.push(assertion("microsoftdocs/mcp plugin installed", (allagents.data?.plugins ?? []).includes("microsoftdocs/mcp"), JSON.stringify(allagents.data?.plugins ?? [])));
+  assertions.push(assertion("microsoft-learn MCP configured", allagents.data?.mcpServers?.["microsoft-learn"]?.url === "https://learn.microsoft.com/api/mcp", JSON.stringify(allagents.data?.mcpServers?.["microsoft-learn"] ?? null)));
+  assertions.push(assertion("microsoft-learn MCP uses http transport", allagents.data?.mcpServers?.["microsoft-learn"]?.type === "http", String(allagents.data?.mcpServers?.["microsoft-learn"]?.type ?? "")));
+
+  return assertions;
+}
+
 function checkLearnSkillAndHook() {
   const assertions = [];
   const skill = loadLearnSkill();
@@ -598,6 +740,14 @@ function runCheck(checkName, state) {
       return checkDocsBranchFlowCoverage(state);
     case "evolution-agent":
       return checkEvolutionAgent(state);
+    case "spec-agent-agent-eval-contract":
+      return checkSpecAgentEvalContract(state);
+    case "evolution-agent-agentv-tdd":
+      return checkEvolutionAgentAgentvTdd(state);
+    case "tdd-agents-agent-evals":
+      return checkTddAgentsAgentEvals(state);
+    case "requested-tooling-installation":
+      return checkRequestedToolingInstallation();
     case "learn-skill-hook":
       return checkLearnSkillAndHook();
     case "steering-consumption":

@@ -1,0 +1,10 @@
+name: project-khepri
+version: 1.0.0
+description: APM project for project-khepri
+author: Tyler Kendrick
+dependencies:
+  apm:
+  - danielmeppiel/form-builder
+  mcp: []
+includes: auto
+scripts: {}

@@ -381,7 +381,7 @@ function lintProfiles() {
     return assertions;
   }
   const files = readdirSync(agentsDir)
-    .filter((fileName) => fileName.endsWith(".md"))
+    .filter((fileName) => fileName.endsWith(".md") && !fileName.endsWith(".agent.md"))
     .sort();
   const agentNames = new Set(files.map((fileName) => fileName.replace(/\.md$/, "")));
   const expectedNames = new Set(Object.keys(expectedAgents));

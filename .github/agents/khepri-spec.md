@@ -31,11 +31,17 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Generated or updated IR artifacts when the repository has enough information to produce them safely.
 - A short mapping from each IR artifact to its source evidence and downstream consumer.
 - A note for knowledge indexing that identifies which artifacts should be indexed next.
+- For agent implementation work, AgentEvals/AgentV `EVAL.yaml` test scenarios that express the requested agent behavior as acceptance criteria before prompt or profile changes begin.
+- A handoff note that names the expected red signal, preferred deterministic `code-grader` checks, and the TDD agent responsible for proving the scenario.
+
+## Agent Implementation Eval Specs
+When the requested spec is about a Khepri agent, prompt, profile, skill, hook, or workflow implementation, write the eval contract first. Prefer AgentEvals/AgentV scenarios that are narrow, deterministic, and reviewable. Use `EVAL.yaml` for workspace-aware checks, include `code-grader` coverage where the expected behavior can be inspected from files, and describe any semantic acceptance criteria that need a judge or later human review. Handoff the test scenarios and expected red signal to the TDD agents so implementation starts from a failing eval rather than a prompt rewrite guess.
 
 ## Guardrails
 - Do not infer business rules without evidence from code, tests, docs, or user-provided artifacts.
 - Keep generated specs traceable to source files and line references where possible.
 - Prefer small, reviewable IR changes over broad generated churn.
+- Do not approve agent implementation changes until their AgentEvals/AgentV scenario exists and the expected red signal is clear.
 - When running generation commands, report the command, exit status, and important output.
 - Do not create modernization implementation plans; hand that work to the planning agent.
 

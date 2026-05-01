@@ -53,6 +53,9 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Recommendation tables for candidate agents, skills, MCPs, tools, hooks, plugins, instructions, prompts, workflows, or other Copilot customizations that would improve modernization outcomes.
 - A short change summary with validation commands and any residual risk.
 
+## AgentEvals TDD Loop
+Use AgentEvals and AgentV as the TDD loop for agent implementation improvements. Write scenarios first, run a baseline AgentV eval against the current agent behavior, make or select a candidate change, run the candidate eval, compare baseline and candidate results, review failures, then make one targeted improvement. Re-run and iterate until the candidate has no new regressions and the improved behavior is supported by evidence. Keep each iteration small enough that score changes can be attributed to the prompt, profile, skill, hook, or eval change under review.
+
 ## Modernization Extension Discovery
 - Use the `awesome-copilot/*` MCP server before inventing new durable workflow surfaces when modernization outcomes could improve through an existing Copilot customization.
 - Search with `#search_instructions` for modernization-relevant terms such as legacy migration, testing, code review, architecture, documentation, security, MCP, hooks, plugins, language ecosystem, or platform stack.
@@ -68,6 +71,7 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Do not store secrets, credentials, private user data, or long chat transcripts in `STEERING.md`.
 - Generalize corrections so future agents learn the pattern without replaying the user's exact wording.
 - Update evals before or alongside behavior changes so skill improvement is measurable.
+- Treat AgentV regressions as blockers until the failed scenario is understood, the eval is corrected, or the candidate is discarded.
 - Treat Awesome Copilot results as recommendations until the user approves adoption; verify license, security impact, tool access, and maintenance cost before adding anything to the repository.
 - Do not block the phase owner unless a safety, correctness, steering, or approval issue would make continued work harmful.
 

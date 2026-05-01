@@ -153,6 +153,87 @@ tests:
         config:
           check: evolution-agent
 
+  - id: spec-agent-agent-eval-contract
+    criteria: The khepri-spec custom agent turns agent implementation requirements into AgentEvals/AgentV scenarios before implementation work begins.
+    input: Inspect .github/agents/khepri-spec.md for agent-eval scenario authoring responsibilities.
+    expected_output:
+      agent_profile: khepri-spec
+      responsibilities:
+        - describe agent implementation behavior as acceptance criteria
+        - create or update AgentEvals/AgentV EVAL.yaml scenarios before prompt/profile changes
+        - include deterministic code-grader coverage where possible
+        - hand off eval scenarios and expected red signal to TDD agents
+    assertions:
+      - name: spec-agent-agent-eval-contract
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: spec-agent-agent-eval-contract
+
+  - id: evolution-agent-agentv-tdd
+    criteria: The khepri-evolution custom agent uses AgentEvals/AgentV as a TDD loop for improving agent implementations.
+    input: Inspect .github/agents/khepri-evolution.md for baseline/candidate AgentV iteration behavior.
+    expected_output:
+      agent_profile: khepri-evolution
+      workflow:
+        - write scenarios first
+        - run baseline AgentV evaluation
+        - run candidate AgentV evaluation
+        - compare results
+        - review failures
+        - make one targeted improvement
+        - rerun until no regressions
+    assertions:
+      - name: evolution-agent-agentv-tdd
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: evolution-agent-agentv-tdd
+
+  - id: tdd-agents-agent-evals
+    criteria: The khepri-code and khepri-test custom agents enforce red/green/refactor AgentEvals evidence for agent prompt/profile implementation changes.
+    input: Inspect .github/agents/khepri-code.md and .github/agents/khepri-test.md for AgentV-backed TDD behavior.
+    expected_output:
+      agent_profiles:
+        - khepri-code
+        - khepri-test
+      responsibilities:
+        - require failing AgentV eval or code-grader before agent implementation changes
+        - implement the smallest prompt/profile change needed to pass
+        - rerun focused evals and broader validation
+        - report red and green evidence with commands and exit status
+    assertions:
+      - name: tdd-agents-agent-evals
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: tdd-agents-agent-evals
+
+  - id: requested-tooling-installation
+    criteria: The requested APM package, skills, AgentV-adjacent MCP/plugin config, and ADR agent artifacts are installed in project scope.
+    input: Inspect installed project tooling and generated configuration.
+    expected_output:
+      apm_dependency: danielmeppiel/form-builder
+      project_skills:
+        - sensei
+        - editorconfig
+        - microsoft-skill-creator
+        - create-architectural-decision-record
+      project_agent: adr-generator.agent.md
+      mcp_server: microsoft-learn
+      plugin: microsoftdocs/mcp
+      compiled_context: AGENTS.md
+    assertions:
+      - name: requested-tooling-installation
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: requested-tooling-installation
+
   - id: learn-skill-hook
     criteria: The learn agent skill and GitHub hook capture user corrections as succinct generalized steering.
     input: Inspect .github/skills/learn and .github/hooks/learn.json.

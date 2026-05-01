@@ -19,5 +19,10 @@
 			]
 		}
 	},
-	"postStartCommand": "bash .devcontainer/install-dependencies.sh"
+	"remoteEnv": {
+		"PATH": "${containerEnv:HOME}/.local/bin:${containerEnv:PATH}",
+		"PYTHONUTF8": "1",
+		"PYTHONIOENCODING": "utf-8"
+	},
+	"postCreateCommand": "bash .devcontainer/install-dependencies.sh"
 }

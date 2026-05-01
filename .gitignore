@@ -409,3 +409,13 @@ FodyWeavers.xsd
 
 # APM dependencies
 apm_modules/
+
+# Squad runtime state
+.env
+.env.*
+.squad-workstream
+.squad/.scratch/
+.squad/decisions/inbox/
+.squad/log/
+.squad/orchestration-log/
+.squad/sessions/

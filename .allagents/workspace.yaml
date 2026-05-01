@@ -1,0 +1,13 @@
+repositories: []
+plugins:
+  - microsoftdocs/mcp
+clients:
+  - universal
+mcpServers:
+  microsoft-learn:
+    type: http
+    url: https://learn.microsoft.com/api/mcp
+    clients:
+      - copilot
+      - codex
+version: 2

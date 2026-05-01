@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "create-architectural-decision-record": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/create-architectural-decision-record/SKILL.md",
+      "computedHash": "5c99e32293271aef0270c279c2af8b62301e29257bf85f2ebf7e810c740b4404"
+    },
+    "editorconfig": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/editorconfig/SKILL.md",
+      "computedHash": "19ce7c1a970666aadccbcbdcf9a37b4675cb7da24f3a5b603ec06ed6d04a0124"
+    },
+    "microsoft-skill-creator": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/microsoft-skill-creator/SKILL.md",
+      "computedHash": "154dc5be88c22647c53cdd32f83c7ca9757a86bb2da9b93b435b8fc26a9934b7"
+    },
+    "sensei": {
+      "source": "microsoft/github-copilot-for-azure",
+      "sourceType": "github",
+      "skillPath": ".github/skills/sensei/SKILL.md",
+      "computedHash": "fce9a6f935e86e0e718d0a1ccbc960eee9f1bb18d9fd4178261bfa2d61730f50"
+    }
+  }
+}

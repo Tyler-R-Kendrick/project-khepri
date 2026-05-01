@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -304,8 +304,10 @@ function normalizeTools(value) {
   return [];
 }
 
+const allowedNamespacePrefixes = ["github/", "awesome-copilot/", "playwright/"];
+
 function hasAllowedToolName(tool) {
-  return allowedTools.has(tool) || /^[a-z0-9-]+\/[\w*-]+$/i.test(tool);
+  return allowedTools.has(tool) || allowedNamespacePrefixes.some((prefix) => tool.startsWith(prefix));
 }
 
 function sameArray(actual, expected) {
@@ -374,6 +376,10 @@ function validateHandoff(agentName, handoff, index, knownAgents, expected) {
 
 function lintProfiles() {
   const assertions = [];
+  if (!existsSync(agentsDir)) {
+    assertions.push(assertion("(directory)", ".github/agents directory exists", false, `directory not found: ${agentsDir}`));
+    return assertions;
+  }
   const files = readdirSync(agentsDir)
     .filter((fileName) => fileName.endsWith(".md") && !fileName.endsWith(".agent.md"))
     .sort();

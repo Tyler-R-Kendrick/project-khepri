@@ -529,6 +529,122 @@ function checkEvolutionAgentAgentvTdd(state) {
   return assertions;
 }
 
+function checkEvolutionAgentIterationDiscipline(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-evolution");
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "improvement backlog",
+    "iteration ledger",
+    "hypothesis",
+    "expected score movement",
+    "baseline score",
+    "candidate score",
+    "changed files",
+    "rollback plan",
+    "stop condition",
+    "residual risk",
+    "next experiment"
+  ]) {
+    assertions.push(assertion(`khepri-evolution covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkEvolutionAgentTddEvidence(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-evolution");
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "RED evidence",
+    "GREEN evidence",
+    "RED command",
+    "GREEN command",
+    "exit status",
+    "artifact path",
+    "focused check",
+    "broader validation",
+    "failing for the expected reason",
+    "do not weaken assertions",
+    "update scenario before implementation"
+  ]) {
+    assertions.push(assertion(`khepri-evolution covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkEvolutionAgentTechstackSpecialization(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-evolution");
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "techstack-specific agents",
+    "techstack-specific skills",
+    "MCP servers",
+    "legacy system",
+    "target system",
+    "simulation harness",
+    "emulation harness",
+    "runtime runbook",
+    "installation commands",
+    "test commands",
+    "knowledge packets",
+    "specialist creation brief",
+    "iterate deep knowledge",
+    "retire, merge, or narrow"
+  ]) {
+    assertions.push(assertion(`khepri-evolution covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkEvolutionAgentSpecialistArtifactCoverage(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-evolution");
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "agent profile checklist",
+    "skill authoring checklist",
+    "hook automation checklist",
+    "MCP server contract",
+    "tool access model",
+    "least privilege tools",
+    "handoff owner",
+    "evaluation scenarios",
+    "skill invocation examples",
+    "maintenance owner",
+    "deprecation signal",
+    "security review"
+  ]) {
+    assertions.push(assertion(`khepri-evolution covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
 function checkTddAgentsAgentEvals(state) {
   const assertions = [];
   const code = state.profiles.get("khepri-code");
@@ -744,6 +860,14 @@ function runCheck(checkName, state) {
       return checkSpecAgentEvalContract(state);
     case "evolution-agent-agentv-tdd":
       return checkEvolutionAgentAgentvTdd(state);
+    case "evolution-agent-iteration-discipline":
+      return checkEvolutionAgentIterationDiscipline(state);
+    case "evolution-agent-tdd-evidence":
+      return checkEvolutionAgentTddEvidence(state);
+    case "evolution-agent-techstack-specialization":
+      return checkEvolutionAgentTechstackSpecialization(state);
+    case "evolution-agent-specialist-artifact-coverage":
+      return checkEvolutionAgentSpecialistArtifactCoverage(state);
     case "tdd-agents-agent-evals":
       return checkTddAgentsAgentEvals(state);
     case "requested-tooling-installation":

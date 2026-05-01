@@ -6,13 +6,20 @@
     "eval:agents": "agentv eval run evals/github-agents/khepri-github-agents.eval.yaml --dry-run --threshold 1 --workers 1",
     "eval:agents:validate": "agentv validate evals/github-agents/khepri-github-agents.eval.yaml --max-warnings 0",
     "lint:agents": "node scripts/lint-agent-frontmatter.mjs",
+    "postinstall": "node scripts/patch-squad-postinstall.mjs",
     "preeval:agents": "npm run lint:agents",
+    "squad:build": "squad build",
+    "squad:check": "squad build --check",
+    "squad:doctor": "squad doctor",
+    "squad:status": "squad status",
     "skills:validate": "skills-ref validate .github/skills/learn && skills-ref validate .github/skills/spec-kit",
     "skills:validate:spec-kit": "skills-ref validate .github/skills/spec-kit",
     "speckit:check": "powershell -NoProfile -ExecutionPolicy Bypass -File .github/skills/spec-kit/scripts/check-spec-kit.ps1",
     "sensei:spec-kit": "uv run --with gepa --with litellm python .agents/skills/sensei/scripts/gepa/auto_evaluator.py score --skill spec-kit --skills-dir .github/skills --tests-dir tests --json"
   },
   "devDependencies": {
+    "@bradygaster/squad-cli": "0.9.4",
+    "@bradygaster/squad-sdk": "0.9.4",
     "agentv": "4.24.1",
     "skills-ref": "0.1.5",
     "yaml": "^2.8.1"

@@ -238,6 +238,19 @@ function loadLearnSkill() {
   };
 }
 
+function loadSpecKitSkill() {
+  const skillPath = path.join(repoRoot(), ".github", "skills", "spec-kit", "SKILL.md");
+  if (!existsSync(skillPath)) {
+    return { skillPath, exists: false };
+  }
+
+  return {
+    skillPath,
+    exists: true,
+    ...parseMarkdownWithFrontmatter(skillPath)
+  };
+}
+
 function loadLearnHook() {
   const hookPath = path.join(repoRoot(), ".github", "hooks", "learn.json");
   if (!existsSync(hookPath)) {
@@ -815,6 +828,89 @@ function checkAgentSkillsSpecCompliance() {
   return assertions;
 }
 
+function checkSpecKitSkill() {
+  const assertions = [];
+  const skill = loadSpecKitSkill();
+  assertions.push(assertion("spec-kit skill exists", skill.exists, skill.skillPath));
+  if (!skill.exists) {
+    return assertions;
+  }
+
+  const frontmatter = skill.frontmatter ?? {};
+  const description = String(frontmatter.description ?? "");
+  assertions.push(assertion("spec-kit skill frontmatter parses", !skill.parseError, skill.parseError ?? "ok"));
+  assertions.push(assertion("spec-kit skill name matches folder", frontmatter.name === "spec-kit", String(frontmatter.name ?? "")));
+  assertions.push(assertion("spec-kit skill name follows agentskills.io naming", skillNamePattern.test(frontmatter.name ?? ""), String(frontmatter.name ?? "")));
+  assertions.push(assertion("spec-kit skill description is spec sized", description.length >= 1 && description.length <= 1024, `${description.length} characters`));
+  assertions.push(assertion("spec-kit skill description has explicit triggers", hasPhrase(description, "WHEN:"), description));
+  for (const phrase of ["Spec Kit", "Specify CLI", "specify", "speckit", "Spec-Driven Development", "slash commands", "agent integrations"]) {
+    assertions.push(assertion(`spec-kit description covers ${phrase}`, hasPhrase(description, phrase), phrase));
+  }
+
+  assertions.push(assertion("spec-kit skill body stays concise", skill.prompt.split("\n").length <= 500, `${skill.prompt.split("\n").length} lines`));
+  for (const phrase of [
+    "references/cli.md",
+    "references/slash-commands.md",
+    "references/agents-and-integrations.md",
+    "references/workflow.md",
+    "references/skill-standard.md",
+    "scripts/check-spec-kit.ps1",
+    "$speckit-specify",
+    "$speckit-plan",
+    "$speckit-tasks",
+    "$speckit-implement"
+  ]) {
+    assertions.push(assertion(`spec-kit skill points to ${phrase}`, hasPhrase(skill.prompt, phrase), phrase));
+  }
+
+  const root = path.dirname(skill.skillPath);
+  const expectedFiles = [
+    "references/cli.md",
+    "references/slash-commands.md",
+    "references/agents-and-integrations.md",
+    "references/workflow.md",
+    "references/skill-standard.md",
+    "references/sources.md",
+    "scripts/check-spec-kit.ps1",
+    "evals/evals.json"
+  ];
+  for (const relativePath of expectedFiles) {
+    assertions.push(assertion(`spec-kit skill includes ${relativePath}`, existsSync(path.join(root, ...relativePath.split("/"))), relativePath));
+  }
+
+  return assertions;
+}
+
+function checkSpecAgentSpecKitSkillContract(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-spec");
+  assertions.push(assertion("khepri-spec profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    ".github/skills/spec-kit/SKILL.md",
+    "spec-kit skill",
+    "Spec Kit",
+    "Specify CLI",
+    "specify init",
+    "Codex skills integration",
+    "$speckit-constitution",
+    "$speckit-specify",
+    "$speckit-plan",
+    "$speckit-tasks",
+    "$speckit-implement",
+    "slash commands",
+    "agent integrations"
+  ]) {
+    assertions.push(assertion(`khepri-spec uses spec-kit skill guidance: ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
 function checkAgentFrontmatterLint() {
   const linterPath = path.join(repoRoot(), "scripts", "lint-agent-frontmatter.mjs");
   const result = spawnSync(process.execPath, [linterPath, "--json"], {
@@ -878,6 +974,10 @@ function runCheck(checkName, state) {
       return checkSteeringConsumption(state);
     case "agent-skills-spec-compliance":
       return checkAgentSkillsSpecCompliance();
+    case "spec-kit-skill":
+      return checkSpecKitSkill();
+    case "spec-agent-speckit-skill-contract":
+      return checkSpecAgentSpecKitSkillContract(state);
     case "agent-frontmatter-lint":
       return checkAgentFrontmatterLint();
     default:

@@ -354,3 +354,48 @@ tests:
         cwd: ./evals/github-agents
         config:
           check: agent-skills-spec-compliance
+
+  - id: spec-kit-skill
+    criteria: The Project Khepri Spec Kit skill is a complete Agent Skill package with concise frontmatter, progressive references, validation script, and eval prompts.
+    input: Validate .github/skills/spec-kit.
+    expected_output:
+      skill: .github/skills/spec-kit/SKILL.md
+      required_references:
+        - references/cli.md
+        - references/slash-commands.md
+        - references/agents-and-integrations.md
+        - references/workflow.md
+        - references/skill-standard.md
+        - references/sources.md
+      required_script: scripts/check-spec-kit.ps1
+      required_evals: evals/evals.json
+    assertions:
+      - name: spec-kit-skill
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: spec-kit-skill
+
+  - id: spec-agent-speckit-skill-contract
+    criteria: The khepri-spec custom agent tells future agents when and how to use the local Spec Kit skill, CLI, slash-command equivalents, and agent integrations.
+    input: Inspect .github/agents/khepri-spec.md for local spec-kit skill usage guidance.
+    expected_output:
+      agent_profile: khepri-spec
+      skill_reference: .github/skills/spec-kit/SKILL.md
+      required_commands:
+        - $speckit-constitution
+        - $speckit-specify
+        - $speckit-plan
+        - $speckit-tasks
+        - $speckit-implement
+      required_cli:
+        - specify init
+        - Codex skills integration
+    assertions:
+      - name: spec-agent-speckit-skill-contract
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: spec-agent-speckit-skill-contract

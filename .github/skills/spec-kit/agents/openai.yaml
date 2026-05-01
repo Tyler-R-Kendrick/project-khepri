@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit"
+  short_description: "Use GitHub Spec Kit and Specify CLI for spec-driven development."
+  default_prompt: "Use this skill to initialize and run a Spec Kit workflow with Codex skills, Specify CLI commands, and phase-appropriate agent guidance."

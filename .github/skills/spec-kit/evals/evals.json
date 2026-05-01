@@ -1,0 +1,35 @@
+{
+  "skill_name": "spec-kit",
+  "evals": [
+    {
+      "id": "codex-init",
+      "prompt": "Install GitHub spec-kit in this repo and make Codex use its skills instead of slash prompt files.",
+      "expected_output": "Uses the official Specify CLI from github/spec-kit, initializes with --integration codex --integration-options=\"--skills\", and verifies .agents/skills/speckit-* exists."
+    },
+    {
+      "id": "slash-to-skill",
+      "prompt": "The docs say to run /speckit.plan, but I am in Codex. What should I invoke?",
+      "expected_output": "Explains the Codex equivalent $speckit-plan and points to the slash-command mapping."
+    },
+    {
+      "id": "phase-selection",
+      "prompt": "I have a feature idea but no requirements yet. Should I run tasks or implement?",
+      "expected_output": "Chooses specify first, optionally clarify, then plan and tasks before implement."
+    },
+    {
+      "id": "integration-management",
+      "prompt": "Show me how to switch an initialized Spec Kit project from Copilot to Codex skills.",
+      "expected_output": "Uses specify integration switch codex with integration options, warns that only one integration is active, and preserves local modifications."
+    },
+    {
+      "id": "near-miss-generic-test",
+      "prompt": "Write a unit test for this React component.",
+      "expected_output": "Does not route to Spec Kit unless the user asks for spec-driven feature artifacts or Spec Kit commands."
+    },
+    {
+      "id": "near-miss-skill-authoring",
+      "prompt": "Create a general Agent Skill for editing spreadsheets.",
+      "expected_output": "Uses general skill-authoring guidance, not Spec Kit, unless the skill is about Spec Kit or SDD workflows."
+    }
+  ]
+}

@@ -13,8 +13,9 @@ Use this skill when the user correction should change future Project Khepri agen
 2. Convert it into a succinct generalization that future agents can apply.
 3. Do not store secrets, credentials, private data, or a long transcript.
 4. Update `STEERING.md` with the generalized guidance.
-5. Keep existing steering intact unless the user explicitly replaces it.
-6. If the correction implies a reusable workflow, ask `khepri-evolution` to create or improve the relevant Agent Skill, hook, or AgentV eval.
+5. Preserve that future agents should read before work by checking `STEERING.md` before phase tasks.
+6. Keep existing steering intact unless the user explicitly replaces it.
+7. If the correction implies a reusable workflow, ask `khepri-evolution` to create or improve the relevant Agent Skill, hook, or AgentV eval.
 
 ## Format
 

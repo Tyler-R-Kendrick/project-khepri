@@ -1,0 +1,7 @@
+{
+  "scenarioId": "java-payment-monolith",
+  "legacyKind": "java-monolith",
+  "edgeCaseFixtures": ["JMS replay", "transaction boundary", "classloader resource"],
+  "replayCommand": "Replay fixtures/jms-replay.jsonl through the target adapter and compare API contract, transaction boundary, exception mapping, and persistence parity.",
+  "acceptance": ["message replay", "API contract tests", "persistence parity"]
+}

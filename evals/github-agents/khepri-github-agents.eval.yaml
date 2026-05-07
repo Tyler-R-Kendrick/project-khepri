@@ -13,6 +13,9 @@ tests:
         - khepri-orchestrator
         - khepri-spec
         - khepri-knowledge
+        - app-modernization
+        - data-modernization
+        - infra-modernization
         - khepri-planner
         - khepri-scaffold
         - khepri-code
@@ -35,6 +38,9 @@ tests:
         - khepri-evolution
         - khepri-spec
         - khepri-knowledge
+        - app-modernization
+        - data-modernization
+        - infra-modernization
         - khepri-planner
         - khepri-scaffold
         - khepri-code
@@ -399,3 +405,729 @@ tests:
         cwd: ./evals/github-agents
         config:
           check: spec-agent-speckit-skill-contract
+
+  - id: maf-ghcp-modernization-workflow
+    criteria: The repository enforces the modernization workflow in Microsoft Agent Framework code using the GitHub Copilot SDK, registered subagents, AgentEvals-backed TDD, and app/data/infra modernization pattern agents.
+    input: Inspect the .NET modernization workflow, GHCP SDK registry, custom agent profiles, and package references.
+    expected_output:
+      workflow_project: dotnet/src/Modernization/Workflow/Khepri.Modernization.Workflow.csproj
+      required_packages:
+        - GitHub.Copilot.SDK
+        - Microsoft.Agents.AI.GitHub.Copilot
+        - Microsoft.Agents.AI.Workflows
+      required_stages:
+        - legacy-requirements-specs-tests
+        - target-requirements-specs-test-plans
+        - incremental-modernization-plan
+        - increment-area-squads
+        - current-stage-plan-refinement
+        - tdd-modernization-execution
+      required_agents:
+        - khepri-orchestrator
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-planner
+        - khepri-scaffold
+        - khepri-code
+        - khepri-test
+        - khepri-modernization-assessor
+        - khepri-evolution
+        - app-modernization
+        - data-modernization
+        - infra-modernization
+      evidence:
+        - AgentEvals
+        - agentevals.io
+        - tool_trajectory
+        - llm_judge
+        - tool-calling
+        - relevance
+        - legacy regression
+        - red/green/refactor
+    assertions:
+      - name: maf-ghcp-modernization-workflow
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: maf-ghcp-modernization-workflow
+
+  - id: multiturn-legacy-to-target-pivot
+    criteria: The orchestrator preserves context across turns, extracts legacy requirements/specs/tests first, then pivots to target desired-state requirements/specs/test-plans without skipping evidence or subagent handoffs.
+    input:
+      - role: user
+        content: "Modernize our legacy claims intake system. First extract the behavior from the COBOL screens, nightly batch jobs, and SQL reports."
+      - role: assistant
+        content: "Phase: legacy discovery. I will call khepri-spec, khepri-knowledge, and khepri-test to capture requirements, specs, and regression seed tests before target planning."
+      - role: user
+        content: "Target state is a .NET service with event-driven intake and a reconciled reporting read model. Continue, but keep the nightly report behavior as a hard parity gate."
+    expected_output:
+      required_agents:
+        - khepri-orchestrator
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-test
+        - khepri-planner
+      evidence:
+        - legacy requirements/specs/tests
+        - target requirements/specs/test-plans
+        - nightly report parity gate
+        - source-backed assumptions
+    assertions:
+      - name: custom-multiturn-modernization
+        type: code-grader
+        command: [node, ./evaluators/multiturn-modernization.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: legacy-to-target-pivot
+          required_turns: 3
+          expected_agents:
+            - khepri-spec
+            - khepri-knowledge
+            - khepri-test
+            - khepri-planner
+          required_context_terms:
+            - COBOL screens
+            - nightly batch jobs
+            - SQL reports
+            - event-driven intake
+            - reporting read model
+            - parity gate
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: legacy-to-target-pivot
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-spec
+            - agent:khepri-knowledge
+            - agent:khepri-test
+            - agent:khepri-planner
+
+  - id: multiturn-squad-generation-current-increment
+    criteria: The workflow generates specialized app, data, and infra squads for the current increment, asks each squad to refine the stage plan, and requires AgentEvals plus legacy regression checks before implementation.
+    input:
+      - role: user
+        content: "Increment 2 replaces claims submission while the legacy adjudication engine remains active."
+      - role: assistant
+        content: "Phase: increment planning. I will use app-modernization, data-modernization, and infra-modernization before khepri-planner finalizes the stage plan."
+      - role: user
+        content: "Generate the squads now. Each squad must explain its TDD loop, AgentEvals coverage, rollback path, and how it proves legacy behavior remains equivalent."
+    expected_output:
+      squads:
+        - app
+        - data
+        - infra
+      evidence:
+        - app modernization patterns
+        - data migration gates
+        - infra deployment gates
+        - AgentEvals tool calling and relevance
+        - legacy regression red/green loop
+    assertions:
+      - name: custom-squad-confidence
+        type: code-grader
+        command: [node, ./evaluators/squad-confidence.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: current-increment-squad-generation
+          required_squads:
+            - app
+            - data
+            - infra
+          required_evaluators:
+            - tool_trajectory
+            - llm_judge
+          required_evidence:
+            - TDD
+            - legacy regression
+            - rollback
+            - AgentEvals
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: current-increment-squad-generation
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: unordered
+          expected_tools:
+            - agent:app-modernization
+            - agent:data-modernization
+            - agent:infra-modernization
+            - agent:khepri-planner
+            - agent:khepri-test
+
+  - id: multiturn-tdd-regression-red-green
+    criteria: The code and test agents maintain a TDD loop where legacy regression checks are the red signal, implementation is minimal, and AgentEvals are rerun before acceptance.
+    input:
+      - role: user
+        content: "The first implementation stage changes claim validation rules."
+      - role: assistant
+        content: "Phase: execution. The next action is a failing regression test for the legacy validation behavior, then the smallest implementation change."
+      - role: user
+        content: "Proceed only if the test agent can prove the old invalid-member and late-submission behaviors stay equivalent."
+    expected_output:
+      tdd_loop:
+        - write failing legacy regression test
+        - verify red
+        - implement minimal change
+        - verify green
+        - rerun AgentEvals and acceptance checks
+    assertions:
+      - name: custom-multiturn-modernization
+        type: code-grader
+        command: [node, ./evaluators/multiturn-modernization.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: tdd-regression-red-green
+          required_turns: 3
+          expected_agents:
+            - khepri-code
+            - khepri-test
+            - khepri-modernization-assessor
+          required_context_terms:
+            - claim validation rules
+            - invalid-member
+            - late-submission
+            - failing regression test
+            - verify red
+            - verify green
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: tdd-regression-red-green
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-test
+            - agent:khepri-code
+            - agent:khepri-test
+            - agent:khepri-modernization-assessor
+
+  - id: multiturn-area-pattern-risk-review
+    criteria: The app, data, and infra modernization agents give when-to-use guidance, risks, regression checks, and rollback gates before planner acceptance.
+    input:
+      - role: user
+        content: "We are unsure whether to strangler-wrap the old web app, dual-write claims data, and containerize the worker jobs in the same increment."
+      - role: assistant
+        content: "Phase: area pattern review. I will ask the area modernization agents for when-to-use guidance before planner synthesis."
+      - role: user
+        content: "Keep the answer conservative. I want risks, sequencing, and the evidence required before each pattern is allowed."
+    expected_output:
+      patterns:
+        - strangler
+        - dual-write
+        - containerization
+      evidence:
+        - when to use
+        - when to avoid
+        - sequencing
+        - regression checks
+        - rollback gates
+    assertions:
+      - name: custom-squad-confidence
+        type: code-grader
+        command: [node, ./evaluators/squad-confidence.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: area-pattern-risk-review
+          required_squads:
+            - app
+            - data
+            - infra
+          required_patterns:
+            - strangler
+            - dual-write
+            - containerization
+          required_evidence:
+            - when to use
+            - when to avoid
+            - regression
+            - rollback
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: area-pattern-risk-review
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: unordered
+          expected_tools:
+            - agent:app-modernization
+            - agent:data-modernization
+            - agent:infra-modernization
+            - agent:khepri-planner
+            - agent:khepri-modernization-assessor
+
+  - id: legacy-cobol-requirements-specs-tests-atomic
+    criteria: The legacy extraction step handles COBOL as a first-class target with source-backed requirements, specs, regression tests, and edge-case fixtures before any target planning.
+    input: "Atomic legacy discovery for a COBOL claims platform with CICS/BMS screens, copybooks, JCL batch jobs, VSAM or DB2 data, fixed-width reports, EBCDIC encoding, packed decimals, and restartable nightly batch windows."
+    expected_output:
+      legacy_kind: COBOL
+      stage_id: legacy-requirements-specs-tests
+      required_agents:
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-test
+      legacy_signals:
+        - CICS/BMS screens
+        - copybooks
+        - JCL batch jobs
+        - VSAM or DB2 data
+        - fixed-width reports
+      edge_cases:
+        - EBCDIC encoding
+        - packed decimals
+        - batch restart windows
+      modernization_tests:
+        - copybook fixture tests
+        - batch replay
+        - report parity
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: cobol
+          stage_id: legacy-requirements-specs-tests
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: legacy-cobol-extraction
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-spec
+            - agent:khepri-knowledge
+            - agent:khepri-test
+
+  - id: legacy-dotnet-requirements-specs-tests-atomic
+    criteria: The legacy extraction step handles legacy .NET Framework as a first-class target with code/config/runtime evidence and test modernization scenarios.
+    input: "Atomic legacy discovery for a .NET Framework estate with System.Web on IIS, WebForms/MVC routes, WCF or ASMX endpoints, Windows services, ADO.NET SQL Server access, machine.config/app.config drift, COM interop, and 32-bit dependencies."
+    expected_output:
+      legacy_kind: dotnet-framework
+      stage_id: legacy-requirements-specs-tests
+      required_agents:
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-test
+      legacy_signals:
+        - System.Web
+        - IIS
+        - WCF or ASMX endpoints
+        - Windows services
+        - ADO.NET SQL Server
+      edge_cases:
+        - COM interop
+        - 32-bit dependency
+        - machine.config
+      modernization_tests:
+        - golden-master HTTP contracts
+        - service facade contract tests
+        - config parity
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: dotnet-framework
+          stage_id: legacy-requirements-specs-tests
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: legacy-dotnet-extraction
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-spec
+            - agent:khepri-knowledge
+            - agent:khepri-test
+
+  - id: legacy-java-requirements-specs-tests-atomic
+    criteria: The legacy extraction step handles legacy Java monoliths as first-class targets with runtime descriptors, persistence behavior, message contracts, and transaction edge cases.
+    input: "Atomic legacy discovery for a Java monolith with Servlet/JSP or Struts screens, EJB or JMS flows, Ant or Maven builds, application server descriptors, JDBC or Hibernate persistence, transaction boundaries, classloader resource lookup, and checked exception mapping."
+    expected_output:
+      legacy_kind: java-monolith
+      stage_id: legacy-requirements-specs-tests
+      required_agents:
+        - khepri-spec
+        - khepri-knowledge
+        - khepri-test
+      legacy_signals:
+        - Servlet/JSP
+        - EJB or JMS
+        - Ant or Maven
+        - application server descriptors
+        - JDBC or Hibernate
+      edge_cases:
+        - transaction boundaries
+        - classloader resource lookup
+        - checked exception mapping
+      modernization_tests:
+        - message replay
+        - API contract tests
+        - persistence parity
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: java-monolith
+          stage_id: legacy-requirements-specs-tests
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: legacy-java-extraction
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-spec
+            - agent:khepri-knowledge
+            - agent:khepri-test
+
+  - id: target-cobol-modernization-test-plan
+    criteria: Target desired-state planning for COBOL replacement explicitly converts legacy fixtures into target test plans before implementation.
+    input: "Generate target desired-state requirements/specs/test-PLANS for replacing COBOL batch and CICS behavior with a .NET service plus worker pipeline while preserving copybook fixtures, batch replay, report parity, packed-decimal conversions, and restart/retry semantics."
+    expected_output:
+      legacy_kind: COBOL
+      stage_id: target-requirements-specs-test-plans
+      target_test_plans:
+        - copybook fixture tests
+        - batch replay
+        - report parity
+        - packed decimal conversion tests
+        - restart/retry semantics
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: cobol
+          stage_id: target-requirements-specs-test-plans
+
+  - id: target-dotnet-modernization-test-plan
+    criteria: Target desired-state planning for legacy .NET Framework explicitly converts legacy HTTP, WCF, service, and configuration behavior into target test plans.
+    input: "Generate target desired-state requirements/specs/test-PLANS for modernizing a .NET Framework/IIS app to .NET services using golden-master HTTP contracts, WCF/ASMX facade tests, Windows service scheduling parity, config parity, COM interop seams, and 32-bit dependency containment."
+    expected_output:
+      legacy_kind: dotnet-framework
+      stage_id: target-requirements-specs-test-plans
+      target_test_plans:
+        - golden-master HTTP contracts
+        - WCF/ASMX facade tests
+        - scheduling parity
+        - config parity
+        - COM interop seams
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: dotnet-framework
+          stage_id: target-requirements-specs-test-plans
+
+  - id: target-java-modernization-test-plan
+    criteria: Target desired-state planning for legacy Java explicitly converts servlet, messaging, persistence, and transaction behavior into target test plans.
+    input: "Generate target desired-state requirements/specs/test-PLANS for modernizing a Java monolith to Spring Boot services using API contract tests, JMS message replay, persistence parity, transaction-boundary tests, descriptor parity, and checked-exception mapping tests."
+    expected_output:
+      legacy_kind: java-monolith
+      stage_id: target-requirements-specs-test-plans
+      target_test_plans:
+        - API contract tests
+        - JMS message replay
+        - persistence parity
+        - transaction-boundary tests
+        - checked-exception mapping tests
+    assertions:
+      - name: custom-legacy-scenario-coverage
+        type: code-grader
+        command: [node, ./evaluators/legacy-scenario-coverage.mjs]
+        cwd: ./evals/github-agents
+        config:
+          legacy_kind: java-monolith
+          stage_id: target-requirements-specs-test-plans
+
+  - id: atomic-step-legacy-extraction-contract
+    criteria: The legacy extraction workflow step is independently testable as the smallest unit before target planning.
+    input: "Validate atomic workflow step legacy-requirements-specs-tests with required inputs, outputs, agents, independent verification, supported legacy kinds, and no dependency on target planning."
+    expected_output:
+      stage_id: legacy-requirements-specs-tests
+      atomic_contract: true
+      independent_verification:
+        - source-backed behavior inventory
+        - generated regression seed tests
+        - unsupported assumptions list
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: legacy-requirements-specs-tests
+
+  - id: atomic-step-target-extraction-contract
+    criteria: The target desired-state extraction workflow step is independently testable and produces target test plans without touching implementation.
+    input: "Validate atomic workflow step target-requirements-specs-test-plans with required inputs, outputs, agents, independent verification, and explicit test-PLANS."
+    expected_output:
+      stage_id: target-requirements-specs-test-plans
+      atomic_contract: true
+      independent_verification:
+        - target source evidence
+        - acceptance criteria
+        - test-PLANS
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: target-requirements-specs-test-plans
+
+  - id: atomic-step-high-level-plan-contract
+    criteria: The high-level modernization planning step is independently testable and only synthesizes increments from approved legacy and target specs.
+    input: "Validate atomic workflow step incremental-modernization-plan with required inputs, outputs, agents, independent verification, app/data/infra areas, risk sequencing, and approval checkpoints."
+    expected_output:
+      stage_id: incremental-modernization-plan
+      atomic_contract: true
+      areas:
+        - app
+        - data
+        - infra
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: incremental-modernization-plan
+
+  - id: atomic-step-squad-generation-contract
+    criteria: The squad generation step is independently testable and requires app, data, and infra squads plus AgentEvals before implementation.
+    input: "Validate atomic workflow step increment-area-squads with required inputs, outputs, agents, independent verification, app/data/infra squads, tool_trajectory, llm_judge, and no implementation until eval gates pass."
+    expected_output:
+      stage_id: increment-area-squads
+      atomic_contract: true
+      evaluators:
+        - tool_trajectory
+        - llm_judge
+      squads:
+        - app
+        - data
+        - infra
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: increment-area-squads
+
+  - id: atomic-step-stage-refinement-contract
+    criteria: The current-stage refinement step is independently testable and produces a stage-ready plan with dependencies, rollback, and regression gates.
+    input: "Validate atomic workflow step current-stage-plan-refinement with required inputs, outputs, agents, independent verification, dependencies, rollback plan, and regression gates."
+    expected_output:
+      stage_id: current-stage-plan-refinement
+      atomic_contract: true
+      required_outputs:
+        - stage-ready plan
+        - dependencies
+        - rollback plan
+        - regression gates
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: current-stage-plan-refinement
+
+  - id: atomic-step-tdd-execution-contract
+    criteria: The execution step is independently testable and keeps legacy regression as the red signal before any modernization code change is accepted.
+    input: "Validate atomic workflow step tdd-modernization-execution with required inputs, outputs, agents, independent verification, verify red, verify green, legacy regression checks, AgentEvals rerun, and assessor acceptance."
+    expected_output:
+      stage_id: tdd-modernization-execution
+      atomic_contract: true
+      tdd_loop:
+        - legacy regression red signal
+        - verify red
+        - minimal implementation
+        - verify green
+        - AgentEvals rerun
+    assertions:
+      - name: custom-atomic-workflow-step
+        type: code-grader
+        command: [node, ./evaluators/atomic-workflow-step.mjs]
+        cwd: ./evals/github-agents
+        config:
+          stage_id: tdd-modernization-execution
+
+  - id: cross-legacy-edge-case-regression-matrix
+    criteria: The workflow has an explicit cross-legacy regression matrix proving COBOL, legacy .NET, and legacy Java edge cases remain front-and-center across the flow.
+    input: "Validate the cross-legacy matrix for COBOL packed decimals and batch restarts, .NET Framework COM interop and machine.config drift, and Java transaction boundaries and classloader resource lookup."
+    expected_output:
+      matrix:
+        - legacy_kind: cobol
+          edge_cases:
+            - packed decimals
+            - batch restart windows
+        - legacy_kind: dotnet-framework
+          edge_cases:
+            - COM interop
+            - machine.config
+        - legacy_kind: java-monolith
+          edge_cases:
+            - transaction boundaries
+            - classloader resource lookup
+      evidence:
+        - regression fixtures
+        - parity tests
+        - atomic step coverage
+    assertions:
+      - name: custom-legacy-edge-case-regression
+        type: code-grader
+        command: [node, ./evaluators/legacy-edge-case-regression.mjs]
+        cwd: ./evals/github-agents
+
+  - id: multiturn-mixed-legacy-estate-increment
+    criteria: The orchestrator preserves a mixed COBOL/.NET/Java modernization increment across turns, routes to the right agents, and keeps all edge-case regression gates before execution.
+    input:
+      - role: user
+        content: "Increment 1 includes COBOL eligibility batch extraction, a .NET Framework claims portal facade, and a Java payment monolith read-only adapter."
+      - role: assistant
+        content: "Phase: mixed legacy discovery. I will split source-backed evidence by COBOL, legacy .NET Framework, and legacy Java before any target implementation."
+      - role: user
+        content: "Now refine the stage plan. Keep packed decimals, COM interop, machine.config drift, JMS replay, and transaction boundaries as explicit regression gates."
+    expected_output:
+      required_agents:
+        - khepri-spec
+        - khepri-knowledge
+        - app-modernization
+        - data-modernization
+        - infra-modernization
+        - khepri-planner
+        - khepri-test
+      evidence:
+        - COBOL packed decimals
+        - .NET COM interop
+        - machine.config drift
+        - JMS replay
+        - transaction boundaries
+    assertions:
+      - name: custom-multiturn-modernization
+        type: code-grader
+        command: [node, ./evaluators/multiturn-modernization.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: mixed-legacy-estate-increment
+          required_turns: 3
+          expected_agents:
+            - khepri-spec
+            - khepri-knowledge
+            - app-modernization
+            - data-modernization
+            - infra-modernization
+            - khepri-planner
+            - khepri-test
+          required_context_terms:
+            - COBOL eligibility batch
+            - .NET Framework claims portal
+            - Java payment monolith
+            - packed decimals
+            - COM interop
+            - machine.config drift
+            - JMS replay
+            - transaction boundaries
+      - name: custom-tool-trajectory
+        type: code-grader
+        command: [node, ./evaluators/tool-trajectory.mjs]
+        cwd: ./evals/github-agents
+        config:
+          scenario: mixed-legacy-estate-increment
+          evaluator_type: tool_trajectory
+          trajectory_match_mode: ordered
+          expected_tools:
+            - agent:khepri-spec
+            - agent:khepri-knowledge
+            - agent:app-modernization
+            - agent:data-modernization
+            - agent:infra-modernization
+            - agent:khepri-planner
+            - agent:khepri-test
+      - name: custom-legacy-edge-case-regression
+        type: code-grader
+        command: [node, ./evaluators/legacy-edge-case-regression.mjs]
+        cwd: ./evals/github-agents
+
+  - id: legacy-sample-pack-fixtures
+    criteria: COBOL, legacy .NET Framework, and legacy Java sample packs exist on disk and are referenced by the workflow as replayable regression fixtures.
+    input: "Validate concrete legacy sample packs for COBOL claims batch/CICS, .NET Framework claims portal, and Java payment monolith scenarios, including replay commands and edge-case fixtures."
+    expected_output:
+      sample_packs:
+        - scenario_id: cobol-claims-batch-and-cics
+          root: evals/legacy-samples/cobol-claims
+          fixtures:
+            - EBCDIC
+            - packed decimal
+            - restart checkpoint
+        - scenario_id: dotnet-framework-claims-portal
+          root: evals/legacy-samples/dotnet-framework-claims-portal
+          fixtures:
+            - COM interop
+            - 32-bit
+            - machine.config
+        - scenario_id: java-payment-monolith
+          root: evals/legacy-samples/java-payment-monolith
+          fixtures:
+            - JMS replay
+            - transaction boundary
+            - classloader resource
+    assertions:
+      - name: custom-legacy-sample-pack
+        type: code-grader
+        command: [node, ./evaluators/legacy-sample-pack.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: sample-packs
+
+  - id: agent-legacy-sample-pack-usage
+    criteria: The Khepri agents require sample-pack-driven extraction, planning, verification, and assessment so generated squads can prove behavior against concrete legacy fixtures.
+    input: "Inspect Khepri custom agents for legacy sample pack usage guidance across spec, planner, test, assessor, and app/data/infra modernization agents."
+    expected_output:
+      required_agents:
+        - khepri-spec
+        - khepri-planner
+        - khepri-test
+        - khepri-modernization-assessor
+        - app-modernization
+        - data-modernization
+        - infra-modernization
+      required_guidance:
+        - evals/legacy-samples
+        - sample pack
+        - replay command
+        - edge-case fixture
+        - regression evidence
+        - generated squad
+    assertions:
+      - name: custom-legacy-sample-pack
+        type: code-grader
+        command: [node, ./evaluators/legacy-sample-pack.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: agent-guidance

@@ -18,8 +18,15 @@ The active custom agents are:
 - `khepri-code`: writes tests first, implements target behavior, and handles test feedback.
 - `khepri-test`: runs reproducible verification commands.
 - `khepri-modernization-assessor`: checks parity, risk, and acceptance evidence.
+- `app-modernization`: informs plans with application modernization patterns and when-to-use guidance.
+- `data-modernization`: informs plans with data modernization patterns, migration gates, and regression checks.
+- `infra-modernization`: informs plans with infrastructure modernization patterns, deployment gates, and rollback checks.
 
 `khepri-evolution` is intentionally started before phase-specific work. It watches handoffs, evidence, failures, and user corrections so agents, agent skills, hooks, evals, steering, MCP suggestions, and other workflow assets improve while modernization work is happening.
+
+The enforced workflow contract also exists in .NET under `dotnet/src/Modernization/Workflow`. It uses the GitHub Copilot SDK custom-agent configuration with Microsoft Agent Framework `AIAgent` workflows so the registered Khepri agents and app/data/infra modernization agents are called in the modernization sequence and per-increment squad workflow. The per-increment squad stage requires AgentEvals-style `tool_trajectory` and `llm_judge` relevance evaluators before implementation work proceeds.
+
+Concrete legacy sample packs live under `evals/legacy-samples`. They cover COBOL claims batch/CICS behavior, a legacy .NET Framework claims portal, and a Java payment monolith. Each pack includes source-shaped artifacts, edge-case fixtures, expected behavior, and a replay command so agents and generated squads can anchor modernization plans to regression evidence instead of hypothetical examples.
 
 When modernization work repeatedly depends on a particular legacy or target tech stack, `khepri-evolution` can create or refine techstack-specific agents, techstack-specific skills, hooks, MCP servers, and knowledge packets. Those specialists capture how to install, run, simulate, emulate, and test the legacy and target systems so later phases build on evidence instead of rediscovering runtime behavior.
 
@@ -193,7 +200,7 @@ npm run eval:agents
 npm run skills:validate
 ```
 
-The .NET smoke test currently runs with:
+The .NET smoke and modernization workflow tests currently run with:
 
 ```powershell
 $env:DOTNET_ROLL_FORWARD='Major'; dotnet test dotnet\tests\Code2\NL\Code2NL.Tests.csproj

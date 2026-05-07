@@ -37,6 +37,9 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - A recommendation for whether the failure returns to the code agent, planner, scaffold agent, or environment setup.
 - For agent implementation TDD, red/green evidence that includes the `agentv validate` and focused `agentv eval` or `npm run eval:agents` commands, exit code, failing assertion, focused rerun, and any broader validation still required.
 
+## Legacy Sample Pack Usage
+When a plan references `evals/legacy-samples`, verify the named sample pack before accepting the test loop. Report the replay command, edge-case fixture coverage, and regression evidence produced or still missing. If a generated squad claims parity, require it to connect its tests to the sample pack artifacts and to rerun AgentV or the focused code-grader before broader validation.
+
 ## Guardrails
 - Do not edit files.
 - Do not mark work complete when commands were not run.

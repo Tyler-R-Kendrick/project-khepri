@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Khepri.Modernization.Workflow</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitHub.Copilot.SDK" />
+        <PackageReference Include="Microsoft.Agents.AI.GitHub.Copilot" />
+        <PackageReference Include="Microsoft.Agents.AI.Workflows" />
+    </ItemGroup>
+
+</Project>

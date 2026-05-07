@@ -75,6 +75,24 @@ const expectedAgents = {
         send: false
       },
       {
+        label: "Inform App Modernization",
+        agent: "app-modernization",
+        prompt: "Provide application modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment.",
+        send: false
+      },
+      {
+        label: "Inform Data Modernization",
+        agent: "data-modernization",
+        prompt: "Provide data modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment.",
+        send: false
+      },
+      {
+        label: "Inform Infra Modernization",
+        agent: "infra-modernization",
+        prompt: "Provide infrastructure modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment.",
+        send: false
+      },
+      {
         label: "Plan Modernization",
         agent: "khepri-planner",
         prompt: "Create an approval-ready Project Khepri modernization plan for the current phase, including tests, scaffolding, implementation steps, risks, and verification evidence.",
@@ -257,6 +275,57 @@ const expectedAgents = {
         label: "Index Assessment",
         agent: "khepri-knowledge",
         prompt: "Index this modernization assessment so future Project Khepri planning can retrieve parity, risk, and acceptance evidence.",
+        send: false
+      }
+    ]
+  },
+  "app-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    handoffs: [
+      {
+        label: "Return App Patterns",
+        agent: "khepri-planner",
+        prompt: "Use these app modernization pattern recommendations to refine the current Project Khepri modernization stage plan with explicit tradeoffs, risks, and regression checks.",
+        send: false
+      },
+      {
+        label: "Assess App Risk",
+        agent: "khepri-modernization-assessor",
+        prompt: "Assess the app modernization pattern recommendation for parity risk, acceptance evidence, and unresolved gaps before implementation.",
+        send: false
+      }
+    ]
+  },
+  "data-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    handoffs: [
+      {
+        label: "Return Data Patterns",
+        agent: "khepri-planner",
+        prompt: "Use these data modernization pattern recommendations to refine the current Project Khepri modernization stage plan with explicit tradeoffs, risks, and regression checks.",
+        send: false
+      },
+      {
+        label: "Assess Data Risk",
+        agent: "khepri-modernization-assessor",
+        prompt: "Assess the data modernization pattern recommendation for parity risk, acceptance evidence, and unresolved gaps before implementation.",
+        send: false
+      }
+    ]
+  },
+  "infra-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    handoffs: [
+      {
+        label: "Return Infra Patterns",
+        agent: "khepri-planner",
+        prompt: "Use these infrastructure modernization pattern recommendations to refine the current Project Khepri modernization stage plan with explicit tradeoffs, risks, and regression checks.",
+        send: false
+      },
+      {
+        label: "Assess Infra Risk",
+        agent: "khepri-modernization-assessor",
+        prompt: "Assess the infrastructure modernization pattern recommendation for parity risk, acceptance evidence, and unresolved gaps before implementation.",
         send: false
       }
     ]

@@ -14,7 +14,7 @@ public static class GitHubCopilotModernizationAgentRegistry
     {
         return
         [
-            CreateAgent(ModernizationWorkflow.OrchestratorAgentName, "Project Khepri Orchestrator", "Coordinates the enforced modernization workflow and delegates to registered subagents.", ["read", "search", "agent", "github/*"], "Coordinate the Microsoft Agent Framework modernization workflow. Call registered subagents for each stage and preserve evidence for every handoff."),
+            CreateAgent(ModernizationWorkflow.OrchestratorAgentName, "Project Khepri Orchestrator", "Coordinates the enforced modernization workflow and delegates to registered subagents.", ["read", "search", "agent", "github/*"], "Coordinate the Microsoft Agent Framework modernization workflow. Use the preloaded khepri-modernization-workflow skill, call registered subagents for each stage, and preserve evidence for every handoff.", skills: [ModernizationWorkflow.WorkflowSkillName]),
             CreateAgent(ModernizationWorkflow.EvolutionAgentName, "Project Khepri Evolution", "Improves agents, skills, hooks, MCPs, evals, and steering while modernization work proceeds.", ["read", "search", "edit", "execute", "agent", "github/*"], "Run as the continuous improvement companion for every stage without blocking phase owners unless safety or correctness requires escalation."),
             CreateAgent(ModernizationWorkflow.SpecAgentName, "Project Khepri Spec", "Extracts or generates requirements, specs, tests, and test plans from legacy and target systems.", ["read", "search", "edit", "execute", "github/*"], "Extract legacy requirements, specs, and tests; extract target requirements, specs, and test-PLANS; hand off evidence and unknowns."),
             CreateAgent(ModernizationWorkflow.KnowledgeAgentName, "Project Khepri Knowledge", "Indexes legacy behavior, target standards, business context, and verification evidence.", ["read", "search", "edit", "github/*"], "Index modernization knowledge packets so planners and squads retrieve source-backed context instead of reinventing it."),
@@ -70,7 +70,8 @@ public static class GitHubCopilotModernizationAgentRegistry
         string displayName,
         string description,
         IReadOnlyList<string> tools,
-        string prompt)
+        string prompt,
+        IReadOnlyList<string> skills = null)
     {
         return new CustomAgentConfig
         {
@@ -79,6 +80,7 @@ public static class GitHubCopilotModernizationAgentRegistry
             Description = description,
             Tools = tools.ToList(),
             Prompt = prompt,
+            Skills = skills?.ToList(),
             Infer = true
         };
     }

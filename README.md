@@ -26,6 +26,8 @@ The active custom agents are:
 
 The enforced workflow contract also exists in .NET under `dotnet/src/Modernization/Workflow`. It uses the GitHub Copilot SDK custom-agent configuration with Microsoft Agent Framework `AIAgent` workflows so the registered Khepri agents and app/data/infra modernization agents are called in the modernization sequence and per-increment squad workflow. The per-increment squad stage requires AgentEvals-style `tool_trajectory` and `llm_judge` relevance evaluators before implementation work proceeds.
 
+The workflow is also exposed as the `khepri-modernization-workflow` Agent Skill in `.github/skills/khepri-modernization-workflow`. The skill does not duplicate the workflow; it tells the orchestrator to call the existing .NET workflow code and hand verification to the test agent.
+
 Concrete legacy sample packs live under `evals/legacy-samples`. They cover COBOL claims batch/CICS behavior, a legacy .NET Framework claims portal, and a Java payment monolith. Each pack includes source-shaped artifacts, edge-case fixtures, expected behavior, and a replay command so agents and generated squads can anchor modernization plans to regression evidence instead of hypothetical examples.
 
 When modernization work repeatedly depends on a particular legacy or target tech stack, `khepri-evolution` can create or refine techstack-specific agents, techstack-specific skills, hooks, MCP servers, and knowledge packets. Those specialists capture how to install, run, simulate, emulate, and test the legacy and target systems so later phases build on evidence instead of rediscovering runtime behavior.

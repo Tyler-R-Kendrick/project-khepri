@@ -1,0 +1,3 @@
+interface:
+  display_name: "Khepri Modernization Workflow"
+  short_description: "Run the Khepri workflow through its .NET source of truth"

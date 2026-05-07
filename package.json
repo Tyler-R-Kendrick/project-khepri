@@ -12,7 +12,7 @@
     "squad:check": "squad build --check",
     "squad:doctor": "squad doctor",
     "squad:status": "squad status",
-    "skills:validate": "skills-ref validate .github/skills/learn && skills-ref validate .github/skills/spec-kit",
+    "skills:validate": "skills-ref validate .github/skills/learn && skills-ref validate .github/skills/spec-kit && skills-ref validate .github/skills/khepri-modernization-workflow",
     "skills:validate:spec-kit": "skills-ref validate .github/skills/spec-kit",
     "speckit:check": "powershell -NoProfile -ExecutionPolicy Bypass -File .github/skills/spec-kit/scripts/check-spec-kit.ps1",
     "sensei:spec-kit": "uv run --with gepa --with litellm python .agents/skills/sensei/scripts/gepa/auto_evaluator.py score --skill spec-kit --skills-dir .github/skills --tests-dir tests --json"

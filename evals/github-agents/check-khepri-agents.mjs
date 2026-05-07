@@ -269,6 +269,19 @@ function loadSpecKitSkill() {
   };
 }
 
+function loadModernizationWorkflowSkill() {
+  const skillPath = path.join(repoRoot(), ".github", "skills", "khepri-modernization-workflow", "SKILL.md");
+  if (!existsSync(skillPath)) {
+    return { skillPath, exists: false };
+  }
+
+  return {
+    skillPath,
+    exists: true,
+    ...parseMarkdownWithFrontmatter(skillPath)
+  };
+}
+
 function loadLearnHook() {
   const hookPath = path.join(repoRoot(), ".github", "hooks", "learn.json");
   if (!existsSync(hookPath)) {
@@ -929,6 +942,63 @@ function checkSpecAgentSpecKitSkillContract(state) {
   return assertions;
 }
 
+function checkModernizationWorkflowSkill(state) {
+  const assertions = [];
+  const skill = loadModernizationWorkflowSkill();
+  assertions.push(assertion("khepri modernization workflow skill exists", skill.exists, skill.skillPath));
+  if (skill.exists) {
+    const frontmatter = skill.frontmatter ?? {};
+    const description = String(frontmatter.description ?? "");
+    assertions.push(assertion("workflow skill frontmatter parses", !skill.parseError, skill.parseError ?? "ok"));
+    assertions.push(assertion("workflow skill name matches folder", frontmatter.name === "khepri-modernization-workflow", String(frontmatter.name ?? "")));
+    assertions.push(assertion("workflow skill name follows agentskills.io naming", skillNamePattern.test(frontmatter.name ?? ""), String(frontmatter.name ?? "")));
+    assertions.push(assertion("workflow skill description is trigger-focused", description.startsWith("Use when"), description));
+    assertions.push(assertion("workflow skill description is spec sized", description.length >= 1 && description.length <= 1024, `${description.length} characters`));
+    assertions.push(assertion("workflow skill body stays concise", skill.prompt.split("\n").length <= 500, `${skill.prompt.split("\n").length} lines`));
+    for (const phrase of [
+      "dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs",
+      "dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs",
+      "ModernizationWorkflow.CreateContract",
+      "BuildMicrosoftAgentFrameworkWorkflow",
+      "BuildIncrementSquadWorkflow",
+      "dotnet test dotnet\\tests\\Code2\\NL\\Code2NL.Tests.csproj",
+      "npm run eval:agents"
+    ]) {
+      assertions.push(assertion(`workflow skill calls existing code: ${phrase}`, hasPhrase(skill.prompt, phrase), phrase));
+    }
+  }
+
+  const registryPath = path.join(repoRoot(), "dotnet", "src", "Modernization", "Workflow", "GitHubCopilotModernizationAgentRegistry.cs");
+  const registry = readTextIfExists(registryPath);
+  assertions.push(assertion("GHCP registry exists", Boolean(registry), registryPath));
+  if (registry) {
+    for (const phrase of [
+      ".github/skills",
+      "WorkflowSkillName",
+      "Skills =",
+      "ModernizationWorkflow.WorkflowSkillName",
+      "ModernizationWorkflow.OrchestratorAgentName"
+    ]) {
+      assertions.push(assertion(`GHCP registry exposes workflow skill: ${phrase}`, hasPhrase(registry, phrase), phrase));
+    }
+  }
+
+  const orchestrator = state.profiles.get("khepri-orchestrator");
+  assertions.push(assertion("khepri-orchestrator profile exists", Boolean(orchestrator), orchestrator?.filePath));
+  if (orchestrator) {
+    for (const phrase of [
+      ".github/skills/khepri-modernization-workflow/SKILL.md",
+      "khepri-modernization-workflow",
+      "ModernizationWorkflow.CreateContract",
+      "dotnet test dotnet\\tests\\Code2\\NL\\Code2NL.Tests.csproj"
+    ]) {
+      assertions.push(assertion(`orchestrator can invoke workflow skill: ${phrase}`, hasPhrase(orchestrator.prompt, phrase), phrase));
+    }
+  }
+
+  return assertions;
+}
+
 function checkMafGhcpModernizationWorkflow(state) {
   const root = repoRoot();
   const workflowProjectPath = path.join(root, "dotnet", "src", "Modernization", "Workflow", "Khepri.Modernization.Workflow.csproj");
@@ -1100,6 +1170,8 @@ function runCheck(checkName, state) {
       return checkSpecKitSkill();
     case "spec-agent-speckit-skill-contract":
       return checkSpecAgentSpecKitSkillContract(state);
+    case "modernization-workflow-skill":
+      return checkModernizationWorkflowSkill(state);
     case "maf-ghcp-modernization-workflow":
       return checkMafGhcpModernizationWorkflow(state);
     case "agent-frontmatter-lint":
@@ -1168,6 +1240,7 @@ function inferCheckName(payload) {
     ["validate the learn skill folder", "agent-skills-spec-compliance"],
     ["validate .github/skills/spec-kit", "spec-kit-skill"],
     ["local spec-kit skill usage guidance", "spec-agent-speckit-skill-contract"],
+    ["modernization workflow skill", "modernization-workflow-skill"],
     [".net modernization workflow", "maf-ghcp-modernization-workflow"],
     ["orchestrator profile for subagent delegation", "orchestration-subagents"],
     [".github/agents for project khepri custom agent profiles", "profile-schema"],

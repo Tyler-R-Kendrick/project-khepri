@@ -71,6 +71,7 @@ public sealed record LegacySamplePack(
 
 public static class ModernizationWorkflow
 {
+    public const string WorkflowSkillName = "khepri-modernization-workflow";
     public const string OrchestratorAgentName = "khepri-orchestrator";
     public const string SpecAgentName = "khepri-spec";
     public const string KnowledgeAgentName = "khepri-knowledge";

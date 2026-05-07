@@ -452,6 +452,30 @@ tests:
         config:
           check: maf-ghcp-modernization-workflow
 
+  - id: modernization-workflow-skill
+    criteria: The Microsoft Agent Framework modernization workflow is exposed as a repo-local Agent Skill that instructs agents to call the existing .NET workflow code, and the orchestrator can invoke it.
+    input: Inspect .github/skills/khepri-modernization-workflow, the GHCP SDK registry, and the orchestrator profile for workflow skill invocation.
+    expected_output:
+      skill: .github/skills/khepri-modernization-workflow/SKILL.md
+      skill_name: khepri-modernization-workflow
+      calls_existing_code:
+        - dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs
+        - dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs
+        - ModernizationWorkflow.CreateContract
+        - BuildMicrosoftAgentFrameworkWorkflow
+        - BuildIncrementSquadWorkflow
+      invoker: khepri-orchestrator
+      validation:
+        - dotnet test dotnet\tests\Code2\NL\Code2NL.Tests.csproj
+        - npm run eval:agents
+    assertions:
+      - name: modernization-workflow-skill
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: modernization-workflow-skill
+
   - id: multiturn-legacy-to-target-pivot
     criteria: The orchestrator preserves context across turns, extracts legacy requirements/specs/tests first, then pivots to target desired-state requirements/specs/test-plans without skipping evidence or subagent handoffs.
     input:

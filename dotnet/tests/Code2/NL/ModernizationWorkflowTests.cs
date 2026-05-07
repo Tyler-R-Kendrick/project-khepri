@@ -78,6 +78,36 @@ public sealed class ModernizationWorkflowTests
     }
 
     [TestMethod]
+    public void GitHubCopilotRegistryPreloadsTheWorkflowSkillForTheOrchestrator()
+    {
+        var session = GitHubCopilotModernizationAgentRegistry.CreateSessionConfig(Environment.CurrentDirectory);
+        var orchestrator = session.CustomAgents?.Single(agent => agent.Name == ModernizationWorkflow.OrchestratorAgentName);
+
+        Assert.IsNotNull(session.SkillDirectories);
+        Assert.IsNotNull(orchestrator?.Skills);
+        CollectionAssert.Contains(session.SkillDirectories?.ToArray(), ".github/skills");
+        CollectionAssert.Contains(orchestrator?.Skills?.ToArray(), "khepri-modernization-workflow");
+    }
+
+    [TestMethod]
+    public void ModernizationWorkflowSkillCallsTheDotnetWorkflowCode()
+    {
+        var repoRoot = FindRepoRoot();
+        var skillPath = Path.Combine(repoRoot, ".github", "skills", "khepri-modernization-workflow", "SKILL.md");
+
+        Assert.IsTrue(File.Exists(skillPath), "The modernization workflow should be exposed as a repo-local Agent Skill.");
+
+        var skill = File.ReadAllText(skillPath);
+        Assert.IsTrue(skill.Contains("name: khepri-modernization-workflow", StringComparison.Ordinal), "Skill name should match its folder.");
+        Assert.IsTrue(skill.Contains("Use when", StringComparison.Ordinal), "Skill description should be trigger-focused.");
+        Assert.IsTrue(skill.Contains("dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs", StringComparison.Ordinal));
+        Assert.IsTrue(skill.Contains("dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs", StringComparison.Ordinal));
+        Assert.IsTrue(skill.Contains("ModernizationWorkflow.CreateContract", StringComparison.Ordinal));
+        Assert.IsTrue(skill.Contains("BuildMicrosoftAgentFrameworkWorkflow", StringComparison.Ordinal));
+        Assert.IsTrue(skill.Contains("dotnet test dotnet\\tests\\Code2\\NL\\Code2NL.Tests.csproj", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
     public void PrimaryLegacyScenarioMatrixCoversCobolDotNetAndJavaEdgeCases()
     {
         var scenarios = ModernizationWorkflow.CreatePrimaryLegacyScenarioMatrix();

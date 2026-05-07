@@ -40,6 +40,9 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Risk notes covering behavior gaps, incomplete specs, weak tests, security or compliance concerns, and operational readiness.
 - Acceptance evidence and recommended next action.
 
+## Legacy Sample Pack Usage
+For COBOL, legacy .NET Framework, and legacy Java work, check whether `evals/legacy-samples` contains a matching sample pack. Assessment cannot treat a generated squad recommendation as ready unless its replay command, edge-case fixture coverage, and regression evidence are explicit. Mark the result as caution or block when sample-pack behavior is cited but not replayed, when edge cases are skipped, or when project facts diverge from the sample pack without explanation.
+
 ## Guardrails
 - Do not approve work without test evidence or an explicit reason why evidence cannot be produced.
 - Keep risk concrete and tied to files, tests, or missing artifacts.

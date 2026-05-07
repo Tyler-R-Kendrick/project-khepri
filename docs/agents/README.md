@@ -11,6 +11,9 @@ The profiles formalize the docs-branch modernization flow as bounded subagents:
 - `khepri-code` writes tests first, implements behavior, and handles test feedback.
 - `khepri-test` runs reproducible verification commands.
 - `khepri-modernization-assessor` checks parity, risk, and acceptance evidence.
+- `app-modernization` informs plans with application modernization patterns and when-to-use guidance.
+- `data-modernization` informs plans with data modernization patterns, migration gates, and regression checks.
+- `infra-modernization` informs plans with infrastructure modernization patterns, deployment gates, and rollback checks.
 - `khepri-evolution` creates and improves project agents, Agent Skills, hooks, MCP servers, evals, steering, and techstack-specific modernization expertise.
 
 ## Current Execution Model
@@ -19,6 +22,21 @@ The orchestrator starts `khepri-evolution` first using frontmatter handoffs, the
 the phase owner for the active modernization step. `khepri-evolution` stays alongside
 that work as a non-blocking companion unless it finds a safety, correctness, steering,
 or approval issue that needs user attention.
+
+The same contract is enforced in code by `dotnet/src/Modernization/Workflow`. That
+project uses `GitHub.Copilot.SDK`, `Microsoft.Agents.AI.GitHub.Copilot`, and
+`Microsoft.Agents.AI.Workflows` to register GitHub Copilot custom agents as Microsoft
+Agent Framework `AIAgent` instances, build the high-level sequential workflow, and build
+per-increment concurrent app/data/infra squad workflows. The squad stage carries
+explicit AgentEvals-style `tool_trajectory` and `llm_judge` relevance requirements.
+
+Legacy sample packs in `evals/legacy-samples` give the agents concrete regression
+fixtures for COBOL claims batch/CICS, legacy .NET Framework claims portal, and Java
+payment monolith scenarios. Each pack includes source-shaped artifacts, edge-case
+fixtures, expected outputs, and a replay command. Agents should cite those packs as
+sample-pack evidence only when they map to the active legacy system, and generated
+squads must preserve the replay command, edge-case fixture, and regression evidence
+through planning, TDD, and assessment.
 
 ```mermaid
 sequenceDiagram

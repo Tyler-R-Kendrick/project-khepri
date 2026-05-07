@@ -16,6 +16,9 @@ const expectedAgents = {
       "khepri-evolution",
       "khepri-spec",
       "khepri-knowledge",
+      "app-modernization",
+      "data-modernization",
+      "infra-modernization",
       "khepri-planner",
       "khepri-scaffold",
       "khepri-code",
@@ -57,6 +60,21 @@ const expectedAgents = {
     tools: ["read", "search", "execute", "github/*"],
     sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
     mentions: ["modernization", "risk", "parity", "acceptance"]
+  },
+  "app-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
+    mentions: ["strangler", "branch by abstraction", "contract tests", "when to use"]
+  },
+  "data-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
+    mentions: ["expand/contract", "dual-write", "CDC", "when to use"]
+  },
+  "infra-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
+    mentions: ["infrastructure as code", "blue-green", "observability", "when to use"]
   },
   "khepri-evolution": {
     tools: ["read", "search", "edit", "execute", "agent", "github/*", "awesome-copilot/*"],
@@ -911,6 +929,110 @@ function checkSpecAgentSpecKitSkillContract(state) {
   return assertions;
 }
 
+function checkMafGhcpModernizationWorkflow(state) {
+  const root = repoRoot();
+  const workflowProjectPath = path.join(root, "dotnet", "src", "Modernization", "Workflow", "Khepri.Modernization.Workflow.csproj");
+  const workflowPath = path.join(root, "dotnet", "src", "Modernization", "Workflow", "ModernizationWorkflow.cs");
+  const registryPath = path.join(root, "dotnet", "src", "Modernization", "Workflow", "GitHubCopilotModernizationAgentRegistry.cs");
+  const packagePropsPath = path.join(root, "dotnet", "Directory.Packages.props");
+  const workflowProject = readTextIfExists(workflowProjectPath);
+  const workflow = readTextIfExists(workflowPath);
+  const registry = readTextIfExists(registryPath);
+  const packageProps = readTextIfExists(packagePropsPath);
+  const workflowText = `${workflow ?? ""}\n${registry ?? ""}`;
+  const assertions = [];
+
+  assertions.push(assertion("Microsoft Agent Framework workflow project exists", Boolean(workflowProject), workflowProjectPath));
+  assertions.push(assertion("Modernization workflow implementation exists", Boolean(workflow), workflowPath));
+  assertions.push(assertion("GitHub Copilot modernization agent registry exists", Boolean(registry), registryPath));
+  assertions.push(assertion("Central package versions file exists", Boolean(packageProps), packagePropsPath));
+
+  for (const packageName of [
+    "GitHub.Copilot.SDK",
+    "Microsoft.Agents.AI.GitHub.Copilot",
+    "Microsoft.Agents.AI.Workflows"
+  ]) {
+    assertions.push(assertion(`workflow package references ${packageName}`, hasPhrase(`${workflowProject ?? ""}\n${packageProps ?? ""}`, packageName), packageName));
+  }
+
+  for (const phrase of [
+    "GitHub.Copilot.SDK",
+    "Microsoft.Agents.AI.GitHub.Copilot",
+    "Microsoft.Agents.AI.Workflows",
+    "CopilotClient",
+    "CustomAgentConfig",
+    "SessionConfig",
+    "CustomAgents",
+    "AIAgent",
+    "RequiredAgentEvals",
+    "AgentWorkflowBuilder.BuildSequential",
+    "AgentWorkflowBuilder.BuildConcurrent"
+  ]) {
+    assertions.push(assertion(`workflow uses MAF/GHCP API: ${phrase}`, hasPhrase(workflowText, phrase), phrase));
+  }
+
+  for (const stage of [
+    "legacy-requirements-specs-tests",
+    "target-requirements-specs-test-plans",
+    "incremental-modernization-plan",
+    "increment-area-squads",
+    "current-stage-plan-refinement",
+    "tdd-modernization-execution"
+  ]) {
+    assertions.push(assertion(`workflow enforces stage ${stage}`, hasPhrase(workflowText, stage), stage));
+  }
+
+  for (const phrase of [
+    "AgentEvals",
+    "agentevals.io",
+    "tool_trajectory",
+    "llm_judge",
+    "tool-calling",
+    "relevance",
+    "legacy regression",
+    "red/green/refactor"
+  ]) {
+    assertions.push(assertion(`workflow requires modernization TDD evidence: ${phrase}`, hasPhrase(workflowText, phrase), phrase));
+  }
+
+  for (const agentName of [
+    "khepri-orchestrator",
+    "khepri-spec",
+    "khepri-knowledge",
+    "khepri-planner",
+    "khepri-scaffold",
+    "khepri-code",
+    "khepri-test",
+    "khepri-modernization-assessor",
+    "khepri-evolution",
+    "app-modernization",
+    "data-modernization",
+    "infra-modernization"
+  ]) {
+    assertions.push(assertion(`workflow registers/calls ${agentName}`, hasPhrase(workflowText, agentName), agentName));
+  }
+
+  for (const [agentName, phrases] of Object.entries({
+    "app-modernization": ["strangler", "branch by abstraction", "contract tests", "when to use"],
+    "data-modernization": ["expand/contract", "dual-write", "CDC", "when to use"],
+    "infra-modernization": ["infrastructure as code", "blue-green", "observability", "when to use"]
+  })) {
+    const profile = state.profiles.get(agentName);
+    assertions.push(assertion(`${agentName}.md exists`, Boolean(profile), profile?.filePath));
+    if (!profile) {
+      continue;
+    }
+
+    assertions.push(assertion(`${agentName} targets GitHub Copilot`, profile.frontmatter.target === "github-copilot", String(profile.frontmatter.target ?? "")));
+    assertions.push(assertion(`${agentName} uses STEERING.md`, hasPhrase(profile.prompt, "STEERING.md"), "STEERING.md"));
+    for (const phrase of phrases) {
+      assertions.push(assertion(`${agentName} captures modernization pattern: ${phrase}`, hasPhrase(profile.prompt, phrase), phrase));
+    }
+  }
+
+  return assertions;
+}
+
 function checkAgentFrontmatterLint() {
   const linterPath = path.join(repoRoot(), "scripts", "lint-agent-frontmatter.mjs");
   const result = spawnSync(process.execPath, [linterPath, "--json"], {
@@ -978,6 +1100,8 @@ function runCheck(checkName, state) {
       return checkSpecKitSkill();
     case "spec-agent-speckit-skill-contract":
       return checkSpecAgentSpecKitSkillContract(state);
+    case "maf-ghcp-modernization-workflow":
+      return checkMafGhcpModernizationWorkflow(state);
     case "agent-frontmatter-lint":
       return checkAgentFrontmatterLint();
     default:
@@ -1007,7 +1131,7 @@ try {
 }
 
 const state = loadProfiles();
-const checkName = payload.config?.check ?? "profile-schema";
+const checkName = payload.config?.check ?? inferCheckName(payload) ?? "profile-schema";
 const assertions = runCheck(checkName, state);
 const details = {
   check: checkName,
@@ -1016,3 +1140,39 @@ const details = {
 };
 
 console.log(JSON.stringify(resultFor(assertions, details)));
+
+function inferCheckName(payload) {
+  const text = [
+    payload.input_text,
+    Array.isArray(payload.input)
+      ? payload.input.map((message) => typeof message?.content === "string" ? message.content : "").join("\n")
+      : "",
+    payload.metadata ? JSON.stringify(payload.metadata) : ""
+  ].join("\n").toLowerCase();
+
+  const mappings = [
+    ["frontmatter linter", "agent-frontmatter-lint"],
+    ["explicit operating contracts", "bounded-agent-contracts"],
+    ["tool access matches", "least-privilege-tools"],
+    ["docs branch modernization phases", "docs-branch-flow-coverage"],
+    ["baseline/candidate agentv iteration", "evolution-agent-agentv-tdd"],
+    ["repeatable iteration discipline", "evolution-agent-iteration-discipline"],
+    ["evidence reporting requirements", "evolution-agent-tdd-evidence"],
+    ["specialist creation", "evolution-agent-techstack-specialization"],
+    ["required checklists before creating techstack-specific", "evolution-agent-specialist-artifact-coverage"],
+    ["agent-eval scenario authoring responsibilities", "spec-agent-agent-eval-contract"],
+    ["khepri-code.md and .github/agents/khepri-test.md", "tdd-agents-agent-evals"],
+    ["installed project tooling", "requested-tooling-installation"],
+    [".github/skills/learn and .github/hooks/learn.json", "learn-skill-hook"],
+    ["inspect steering.md", "steering-consumption"],
+    ["validate the learn skill folder", "agent-skills-spec-compliance"],
+    ["validate .github/skills/spec-kit", "spec-kit-skill"],
+    ["local spec-kit skill usage guidance", "spec-agent-speckit-skill-contract"],
+    [".net modernization workflow", "maf-ghcp-modernization-workflow"],
+    ["orchestrator profile for subagent delegation", "orchestration-subagents"],
+    [".github/agents for project khepri custom agent profiles", "profile-schema"],
+    ["project agent skills, hooks, steering", "evolution-agent"]
+  ];
+
+  return mappings.find(([phrase]) => text.includes(phrase))?.[1];
+}

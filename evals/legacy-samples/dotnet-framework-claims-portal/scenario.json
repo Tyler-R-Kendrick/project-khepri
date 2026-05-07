@@ -1,0 +1,7 @@
+{
+  "scenarioId": "dotnet-framework-claims-portal",
+  "legacyKind": "dotnet-framework",
+  "edgeCaseFixtures": ["COM interop", "32-bit", "machine.config"],
+  "replayCommand": "Replay fixtures/http-golden-master.json against the target facade and compare route, status, payload, scheduling, and config parity.",
+  "acceptance": ["golden-master HTTP contracts", "service facade contract tests", "config parity"]
+}

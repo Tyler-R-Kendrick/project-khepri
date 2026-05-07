@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Code2\NL\Code2NL.csproj" />
+        <ProjectReference Include="..\..\..\src\Modernization\Workflow\Khepri.Modernization.Workflow.csproj" />
     </ItemGroup>
 
 </Project>

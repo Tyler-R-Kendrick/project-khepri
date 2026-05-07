@@ -1,0 +1,7 @@
+{
+  "scenarioId": "cobol-claims-batch-and-cics",
+  "legacyKind": "cobol",
+  "edgeCaseFixtures": ["EBCDIC", "packed decimal", "restart checkpoint"],
+  "replayCommand": "Replay fixtures/eligibility-records.fixed through programs/ELIGBLTY.CBL and compare expected/eligibility-report.txt.",
+  "acceptance": ["copybook fixture tests", "batch replay", "report parity"]
+}

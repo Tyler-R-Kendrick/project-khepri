@@ -1,0 +1,12 @@
+{
+  "scenarioId": "dotnet-framework-claims-portal",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/Claims/Details/CLM-1001",
+      "expectedStatus": 200,
+      "expectedBody": { "claimId": "CLM-1001", "status": "PendingReview" }
+    }
+  ],
+  "edgeCaseFixtures": ["COM interop", "32-bit", "machine.config"]
+}

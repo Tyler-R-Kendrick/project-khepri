@@ -1,0 +1,2 @@
+{"messageId":"MSG-1001","paymentId":"PMT-1001","amount":"19.99","expectedStatus":"SETTLED","transactionBoundary":"container"}
+{"messageId":"MSG-1002","paymentId":"PMT-1001","amount":"19.99","expectedStatus":"DUPLICATE_REJECTED","transactionBoundary":"container"}

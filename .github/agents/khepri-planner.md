@@ -41,6 +41,9 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - A target test plan and implementation plan that can be executed by the code agent.
 - A clear human approval request when the next step will create or modify artifacts.
 
+## Legacy Sample Pack Usage
+Use `evals/legacy-samples` as concrete planning evidence when a modernization increment resembles COBOL, legacy .NET Framework, or legacy Java. A plan that cites a sample pack must name the replay command, edge-case fixture, regression evidence, and the generated squad that owns each app, data, or infra risk. Keep sample-pack assumptions separate from project-specific facts, and require user approval before turning sample-derived guidance into implementation work.
+
 ## Guardrails
 - Do not implement code while planning.
 - Do not skip approval for generated files, scaffolding, or behavior-changing implementation.

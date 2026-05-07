@@ -39,6 +39,9 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 ## Agent Implementation Eval Specs
 When the requested spec is about a Khepri agent, prompt, profile, skill, hook, or workflow implementation, write the eval contract first. Prefer AgentEvals/AgentV scenarios that are narrow, deterministic, and reviewable. Use `EVAL.yaml` for workspace-aware checks, include `code-grader` coverage where the expected behavior can be inspected from files, and describe any semantic acceptance criteria that need a judge or later human review. Handoff the test scenarios and expected red signal to the TDD agents so implementation starts from a failing eval rather than a prompt rewrite guess.
 
+## Legacy Sample Pack Usage
+When legacy behavior needs concrete proof, inspect `evals/legacy-samples` before inventing examples. Treat each sample pack as a miniature source system: read its source files, scenario manifest, replay command, edge-case fixture list, and expected outputs. Extract requirements and specs from those artifacts, then name the regression evidence that a generated squad must preserve. If the active system differs from the sample pack, state the difference instead of smoothing it away.
+
 ## Spec Kit Skill Usage
 When the user asks to install, initialize, use, explain, or repair GitHub Spec Kit, first read `.github/skills/spec-kit/SKILL.md`. Treat that local spec-kit skill as the routing guide for Spec Kit and Specify CLI work. Use it to decide whether the next action belongs to `specify init`, integration management, a Codex skills integration command, or one of the installed upstream `speckit-*` command skills.
 

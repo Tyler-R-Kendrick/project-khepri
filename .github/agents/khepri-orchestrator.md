@@ -16,6 +16,18 @@ handoffs:
     agent: khepri-knowledge
     prompt: "Index the current IR, business context, standards, and verification results for the active Project Khepri modernization phase. Return concise retrieval guidance and gaps."
     send: false
+  - label: Inform App Modernization
+    agent: app-modernization
+    prompt: "Provide application modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment."
+    send: false
+  - label: Inform Data Modernization
+    agent: data-modernization
+    prompt: "Provide data modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment."
+    send: false
+  - label: Inform Infra Modernization
+    agent: infra-modernization
+    prompt: "Provide infrastructure modernization patterns, when-to-use guidance, risks, and regression checks for the current Project Khepri modernization increment."
+    send: false
   - label: Plan Modernization
     agent: khepri-planner
     prompt: "Create an approval-ready Project Khepri modernization plan for the current phase, including tests, scaffolding, implementation steps, risks, and verification evidence."
@@ -50,6 +62,7 @@ Use the docs branch modernization sequence as the source of truth. Track each ph
 - Capture the request and scope the legacy system.
 - Collect intermediary representations and index IR specs for the legacy system.
 - Gather business context and team patterns as modernization heuristics.
+- Route app, data, and infra modernization pattern context through the area modernization agents before planning increments.
 - Build the regression suite plan, generate the regression suite, run tests, and index test results.
 - Build target system knowledge from target docs, team patterns, and standards.
 - Produce the target scaffolding plan, implement project scaffolding, request minimal type signatures, generate the minimal type scaffold, and create target tests.
@@ -63,11 +76,14 @@ Invoke custom agents as subagents when their bounded domain is active. Start `kh
 0. khepri-evolution - run alongside all other agent work as a continuous improvement companion; watch handoffs, evidence, failures, and corrections; suggest or implement approved improvements without blocking the phase owner.
 1. khepri-spec - collect or generate source and target intermediary representations, including missing specs.
 2. khepri-knowledge - index IR specs, business context, standards, and test results.
-3. khepri-planner - create test, scaffolding, type, and implementation plans with human approval points.
-4. khepri-scaffold - execute approved project scaffolding and minimal type-signature plans.
-5. khepri-code - generate tests first, implement target behavior, and handle test feedback.
-6. khepri-test - run reproducible verification commands and summarize failures.
-7. khepri-modernization-assessor - assess modernization parity, risk, and acceptance evidence.
+3. app-modernization - inform application modernization areas with proven industry patterns, when to use them, risks, and regression checks.
+4. data-modernization - inform data modernization areas with proven industry patterns, when to use them, risks, and regression checks.
+5. infra-modernization - inform infrastructure modernization areas with proven industry patterns, when to use them, risks, and regression checks.
+6. khepri-planner - create test, scaffolding, type, and implementation plans with human approval points.
+7. khepri-scaffold - execute approved project scaffolding and minimal type-signature plans.
+8. khepri-code - generate tests first, implement target behavior, and handle test feedback.
+9. khepri-test - run reproducible verification commands and summarize failures.
+10. khepri-modernization-assessor - assess modernization parity, risk, and acceptance evidence.
 
 ## Guardrails
 - Keep the workflow phase explicit in every response and handoff.

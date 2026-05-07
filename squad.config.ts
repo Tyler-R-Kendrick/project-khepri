@@ -35,8 +35,9 @@ export default defineSquad({
     name: 'Khepri Modernization Squad',
     description: 'SDK-first Squad for scoped repository modernization and evolutionary team design.',
     projectContext: [
-      'The repository is currently a sparse/empty worktree path named project-khepri.',
-      'Before implementation, the team must discover the real code shape, runtime, tests, and deployment constraints.',
+      'The repository currently implements a Project Khepri agent-workflow control plane: GitHub custom agents, repo-local Agent Skills, hooks, AgentV evals, legacy sample packs, and a .NET Microsoft Agent Framework workflow contract.',
+      'The .NET source of truth lives in dotnet/src/Modernization/Workflow and defines the modernization stage order, required agents, AgentEvals gates, legacy scenario matrix, sample packs, and workflow builders.',
+      'Repository architecture docs and Mermaid diagrams must stay current through the keep-architecture-docs-current skill and architecture-docs hook whenever workflow, agent, skill, hook, eval, CI, or project-structure changes are made.',
       'Modernization work starts with characterization and risk slicing, then proceeds in small validated phases.',
       'Planner owns scope and phase gates. Evolution collaborates with planner to adapt the squad to the modernization effort.',
     ].join('\n'),

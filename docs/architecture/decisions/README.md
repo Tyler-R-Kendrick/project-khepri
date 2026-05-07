@@ -1,52 +1,81 @@
-# Project Khepri Architecture Decision Records
+# Project Khepri Architecture Decisions
 
-## Overview
+This file records the current architecture decisions implemented in the repository. Add a separate ADR file when a future decision needs deeper alternatives and consequences.
 
-This directory contains the architecture decision records (ADRs) for the Khepri project. Each ADR is a markdown file that describes a specific architectural decision made during the development of the project.
+## Active Decisions
 
-The purpose of these records is to document the reasoning behind the decisions, the alternatives considered, and the consequences of the decisions. This helps in understanding the evolution of the project and provides a reference for future development.
+### 1. .NET Owns The Workflow Contract
 
-## Initial Decisions
+`dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs` is the source of truth for:
 
-### Technologies
+- registered Khepri agents;
+- modernization stage order;
+- required agents and evidence per stage;
+- AgentEvals requirements for increment squads;
+- atomic workflow step contracts;
+- primary legacy scenario matrix;
+- legacy sample pack references;
+- Microsoft Agent Framework workflow builders.
 
-#### Programming Languages
+Docs and prompts may summarize this contract, but they should not redefine it independently.
 
-- **csharp**: The Khepri project is primarily written in C#. This decision was made to leverage the performance and capabilities of the .NET ecosystem, which is well-suited for building robust and scalable applications.
-- **python**: Due to the high adoption of Python in the data science and machine learning communities, its community has more libraries and tools available for rapid development of LLM toolsets. If a libraries and patterns are not available in C#, the Khepri project will use Python for those components. This decision allows for flexibility and the ability to leverage existing tools and libraries.
+### 2. GitHub Custom Agents Are The User-Facing Workflow Surface
 
-#### csharp Frameworks
+Repository agents live in `.github/agents`. Their YAML frontmatter declares name, description, target, tools, MCP servers, and handoffs. The .NET registry mirrors the required Khepri agents as `CustomAgentConfig` entries for GitHub Copilot SDK sessions.
 
-- **.NET**: The Khepri project uses the .NET framework for building the core application. This decision was made to take advantage of the performance, security, and scalability features provided by the .NET ecosystem.
-- **Microsoft.Extensions.AI**: The Khepri project uses the Microsoft.Extensions.AI library for building the LLM components. This decision was made to leverage the capabilities of Microsoft.Extensions.AI for building and managing LLMs, which is a key component of the Khepri project. This library should be used unless a feature is not available in the library. In that case, the Semantic Kernel library should be used.
-- **Semantic Kernel**: The Khepri project uses the Semantic Kernel library for building the LLM components. This decision was made to leverage the capabilities of Semantic Kernel for building and managing LLMs, which is a key component of the Khepri project.
+This keeps the same workflow usable from repo-local custom-agent profiles and from the programmatic Microsoft Agent Framework workflow.
 
-#### Python Frameworks
+### 3. Khepri Uses Bounded Phase Agents
 
-- **fastAPI**: The Khepri project uses the FastAPI framework for building the Python components. This is because FastAPI is the backbone of many other projects we intend to use, such as LangServe, MCP, and azure function runtime.
-- **Semantic Kernel**: The Khepri project uses the Semantic Kernel library for building the LLM components. This decision was made to leverage the capabilities of Semantic Kernel for building and managing LLMs, which is a key component of the Khepri project.
+Modernization work is split into narrow roles:
 
-#### Protocols
+- orchestration;
+- continuous evolution;
+- spec extraction/generation;
+- knowledge indexing;
+- planning;
+- scaffolding;
+- code/TDD;
+- verification;
+- assessment;
+- app/data/infra modernization advice.
 
-- **MCP**: We will leverage MCP to expose capabilities as tools/prompts/resources for reuse as MCP servers.
-- **OTLP**: We will leverage OTLP to expose telemetry data to the Khepri project. This decision was made to leverage the capabilities of OTLP for building and managing telemetry data, which is a key component of the Khepri project.
-- **A2A**: For agents, we will leverage A2A for discoverability and orchestration.
-- **GitHub Copilot custom agents**: The repository now uses `.github/agents` profiles to encode the Khepri modernization workflow. Agent frontmatter declares tools, MCP servers, and official `handoffs` so orchestration is machine-checkable instead of only described in prose.
-- **Agent Skills**: The repository uses `.github/skills` for reusable agent behavior. The `learn` skill and matching hook capture user corrections as generalized steering in `STEERING.md`.
-- **AgentEvals/AgentV**: The custom-agent system is validated with AgentEvals/AgentV so profile structure, orchestration, `khepri-evolution`, `learn`, and steering behavior have executable checks.
+Least-privilege tools are intentional: the orchestrator coordinates without direct edit or execute access, while test and assessor agents avoid edit access.
 
-#### Agent Workflow Decisions
+### 4. Continuous Evolution Runs Alongside Phase Work
 
-- **Bounded phase agents**: Modernization work is split across spec, knowledge, planning, scaffolding, coding, test, and assessment agents. Each agent owns a narrow responsibility and has least-privilege tool access.
-- **Continuous evolution**: `khepri-evolution` runs alongside all other agent work as a continuous improvement companion. It watches handoffs, evidence, failures, and user corrections, then suggests or implements approved improvements to agents, skills, hooks, MCPs, evals, and steering.
-- **Awesome Copilot MCP**: `khepri-evolution` has the official Awesome Copilot MCP server configured as `awesome-copilot/*` so it can recommend reusable Copilot agents, skills, instructions, prompts, hooks, plugins, MCPs, tools, and workflows for better modernization outcomes.
-- **Steering over repetition**: User corrections should be generalized into `STEERING.md` through the `learn` skill and hook so all agents can avoid repeating the same mistake.
+`khepri-evolution` is a companion, not the phase owner. It watches handoffs, evidence, failures, user corrections, and repeated workflow gaps, then creates or improves durable surfaces such as agents, Agent Skills, hooks, evals, instructions, steering, and MCP recommendations.
 
-#### Documentation
+Evolution work must stay reviewable and should not block the active phase unless safety, correctness, steering, or approval issues require escalation.
 
-- **Markdown**: The Khepri project uses Markdown for documentation. This decision was made to leverage the simplicity and readability of Markdown for documenting the project. Markdown is widely used and supported, making it a good choice for documentation.
+### 5. AgentV And Code-Graders Protect Agent Contracts
 
-#### Dev Environment
+The repository uses `evals/github-agents/khepri-github-agents.eval.yaml` and `evals/github-agents/check-khepri-agents.mjs` to validate agent profile schema, handoffs, least-privilege tools, steering, skills, hooks, workflow code, and documentation enforcement.
 
-- **VSCode**: The Khepri project uses Visual Studio Code as the primary development environment. This decision was made to leverage the flexibility and extensibility of VSCode, which is a popular choice among developers for building .NET applications. VSCode provides a rich set of features and extensions that enhance the development experience.
-- **Docker**: Because we're developing MCP servers that can be hosted as containers, we will use docker and docker-compose in our dev container definitions to add and test mcp capabilities that we develop.
+Agent prompt, profile, skill, hook, and eval changes should be backed by focused AgentV evidence before broader validation.
+
+### 6. Legacy Sample Packs Provide Concrete Regression Evidence
+
+`evals/legacy-samples` contains small source-shaped sample packs for COBOL claims, legacy .NET Framework claims portal, and Java payment monolith scenarios. They are deterministic fixtures for planning and evals. They are not full legacy-system emulators.
+
+Generated modernization plans should cite these packs only when they map to the active legacy system.
+
+### 7. User Corrections Become Steering
+
+The `learn` skill and `.github/hooks/learn.json` hook capture reusable user corrections as concise generalized entries in `STEERING.md`. All Khepri custom agents read `STEERING.md` before phase work.
+
+Do not store secrets, credentials, private data, or long transcripts in steering.
+
+### 8. Architecture Docs Must Change With Architecture
+
+The `keep-architecture-docs-current` Agent Skill, `.github/hooks/architecture-docs.json`, `.github/hooks/scripts/architecture-docs.mjs`, and `.github/instructions/architecture-docs.instructions.md` enforce the rule that architecture-affecting changes update docs and Mermaid diagrams in the same change.
+
+Architecture-affecting changes include workflow contracts, agent profiles, Agent Skills, hooks, MCP configuration, AgentV evals, CI, package scripts, repository structure, and durable process guidance.
+
+### 9. Squad And Spec Kit Are Integration Surfaces
+
+`squad.config.ts`, `.squad`, `.specify`, and `.agents` provide local squad and Spec Kit assets that support planning, agent specialization, and workflow automation. They are integration surfaces around the Khepri control plane, not replacements for the .NET workflow contract.
+
+### 10. Roadmap Ideas Stay Labeled As Roadmap
+
+Conceptual intermediary-representation tools such as Code2/NL, Structurizr extraction, TOSCA/CUE models, BPMN, SBOM generation, production KnowledgeGraphRag, Planner4, policy-as-code, and runtime emulation remain roadmap items until implemented with tests and docs.

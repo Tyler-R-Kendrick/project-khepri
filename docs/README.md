@@ -1,33 +1,42 @@
 # Project Khepri Docs
 
-This directory documents the Project Khepri modernization workflow, architecture decisions, and repository-level agent system.
+This directory documents the currently implemented Project Khepri modernization workflow control plane.
 
-## Current Workflow
+## Current-State Sources
 
-Project Khepri uses GitHub Copilot custom agents in `.github/agents` to formalize a static modernization flow:
+Use these implementation files as the source of truth before changing docs:
 
-1. `khepri-orchestrator` starts the workflow and launches `khepri-evolution`.
-2. `khepri-evolution` runs alongside all other agent work as a continuous improvement companion.
-3. Phase agents handle bounded modernization responsibilities:
-   - `khepri-spec`
-   - `khepri-knowledge`
-   - `khepri-planner`
-   - `khepri-scaffold`
-   - `khepri-code`
-   - `khepri-test`
-   - `khepri-modernization-assessor`
-4. The `learn` skill and hook capture user corrections into `STEERING.md`.
-5. AgentEvals/AgentV and repository linting verify the custom-agent contracts.
+| Area | Source |
+| --- | --- |
+| Workflow stages and evidence gates | `dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs` |
+| GitHub Copilot session and custom-agent registry | `dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs` |
+| Agent profiles and handoffs | `.github/agents` |
+| Repo-local skills | `.github/skills` |
+| Prompt hooks | `.github/hooks` |
+| AgentV scenarios and code-graders | `evals/github-agents` |
+| Legacy sample packs | `evals/legacy-samples` |
+| Squad configuration | `squad.config.ts` and `.squad` |
 
 ## Doc Index
 
-- `docs/agents/README.md`: custom agents, frontmatter handoffs, `khepri-evolution`, `learn`, Awesome Copilot MCP, and verification commands.
-- `docs/architecture/decisions/README.md`: current architecture decision notes.
-- `README.md`: project overview, modernization flow, tool inventory, and current verification commands.
+- `README.md`: project overview, current architecture diagrams, implemented surfaces, verification commands, and roadmap ideas.
+- `docs/architecture/README.md`: current implementation architecture and Mermaid diagrams.
+- `docs/agents/README.md`: custom-agent contract, .NET registry, skills, hooks, handoffs, and verification.
+- `docs/architecture/decisions/README.md`: active architecture decisions and durable rationale.
+- `CONTRIBUTING.md`: local setup, contribution flow, validation, and PR expectations.
+- `SECURITY.md`: security reporting and secret-handling expectations.
+- `SUPPORT.md`: support and diagnostic guidance.
+- `CODE_OF_CONDUCT.md`: community behavior expectations.
+
+## Documentation Currency
+
+For architecture-affecting changes, invoke `$keep-architecture-docs-current` from `.github/skills/keep-architecture-docs-current/SKILL.md`. The `.github/hooks/architecture-docs.json` prompt hook also reminds agents to use that skill when a prompt indicates workflow, agent, skill, hook, MCP, eval, CI, or repository-structure changes.
+
+Every current-state diagram should match implemented code, not aspirational plans. Roadmap-only ideas belong in an explicit future or roadmap section.
 
 ## Verification
 
-Run the agent contract checks from the repository root:
+Run the agent and skill checks from the repository root:
 
 ```powershell
 npm run lint:agents
@@ -36,7 +45,7 @@ npm run eval:agents
 npm run skills:validate
 ```
 
-Run the current .NET smoke test with:
+Run the .NET workflow tests with:
 
 ```powershell
 $env:DOTNET_ROLL_FORWARD='Major'; dotnet test dotnet\tests\Code2\NL\Code2NL.Tests.csproj

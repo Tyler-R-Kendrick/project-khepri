@@ -282,8 +282,44 @@ function loadModernizationWorkflowSkill() {
   };
 }
 
+function loadArchitectureDocsSkill() {
+  const skillPath = path.join(repoRoot(), ".github", "skills", "keep-architecture-docs-current", "SKILL.md");
+  if (!existsSync(skillPath)) {
+    return { skillPath, exists: false };
+  }
+
+  return {
+    skillPath,
+    exists: true,
+    ...parseMarkdownWithFrontmatter(skillPath)
+  };
+}
+
 function loadLearnHook() {
   const hookPath = path.join(repoRoot(), ".github", "hooks", "learn.json");
+  if (!existsSync(hookPath)) {
+    return { hookPath, exists: false, config: null, parseError: "missing" };
+  }
+
+  try {
+    return {
+      hookPath,
+      exists: true,
+      config: JSON.parse(readFileSync(hookPath, "utf8")),
+      parseError: null
+    };
+  } catch (error) {
+    return {
+      hookPath,
+      exists: true,
+      config: null,
+      parseError: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+function loadArchitectureDocsHook() {
+  const hookPath = path.join(repoRoot(), ".github", "hooks", "architecture-docs.json");
   if (!existsSync(hookPath)) {
     return { hookPath, exists: false, config: null, parseError: "missing" };
   }
@@ -457,7 +493,7 @@ function checkDocsBranchFlowCoverage(state) {
   }
 
   const orchestrator = state.profiles.get("khepri-orchestrator");
-  assertions.push(assertion("orchestrator has the docs flow as its operating sequence", Boolean(orchestrator) && hasPhrase(orchestrator.prompt, "docs branch"), "docs branch"));
+  assertions.push(assertion("orchestrator has the implemented workflow as its operating sequence", Boolean(orchestrator) && (hasPhrase(orchestrator.prompt, "implemented workflow") || hasPhrase(orchestrator.prompt, "workflow contract")), "implemented workflow"));
 
   return assertions;
 }
@@ -822,6 +858,67 @@ function checkLearnSkillAndHook() {
   return assertions;
 }
 
+function checkArchitectureDocsSkillAndHook() {
+  const assertions = [];
+  const skill = loadArchitectureDocsSkill();
+  assertions.push(assertion("architecture docs skill exists", skill.exists, skill.skillPath));
+  if (skill.exists) {
+    const frontmatter = skill.frontmatter ?? {};
+    assertions.push(assertion("architecture docs skill frontmatter parses", !skill.parseError, skill.parseError ?? "ok"));
+    assertions.push(assertion("architecture docs skill name matches folder", frontmatter.name === "keep-architecture-docs-current", String(frontmatter.name ?? "")));
+    assertions.push(assertion("architecture docs skill name follows agentskills.io naming", skillNamePattern.test(frontmatter.name ?? ""), String(frontmatter.name ?? "")));
+    assertions.push(assertion("architecture docs skill description is spec sized", typeof frontmatter.description === "string" && frontmatter.description.length >= 1 && frontmatter.description.length <= 1024, String(frontmatter.description?.length ?? 0)));
+    for (const phrase of ["source of truth", "Mermaid", "README.md", "docs/architecture/README.md", "implemented behavior", "architecture-docs hook", "Validation"]) {
+      assertions.push(assertion(`architecture docs skill mentions ${phrase}`, hasPhrase(skill.prompt, phrase), phrase));
+    }
+  }
+
+  const hook = loadArchitectureDocsHook();
+  assertions.push(assertion("architecture docs hook exists", hook.exists, hook.hookPath));
+  assertions.push(assertion("architecture docs hook parses as JSON", hook.exists && !hook.parseError, hook.parseError ?? "ok"));
+  const userPromptHooks = hook.config?.hooks?.userPromptSubmitted;
+  assertions.push(assertion("architecture docs hook uses userPromptSubmitted", Array.isArray(userPromptHooks) && userPromptHooks.length > 0, "userPromptSubmitted"));
+  const hookEntry = Array.isArray(userPromptHooks) ? userPromptHooks[0] : null;
+  assertions.push(assertion("architecture docs hook is named for the skill", hookEntry?.name === "keep-architecture-docs-current" || hookEntry?.comment?.includes("architecture-docs"), JSON.stringify(hookEntry ?? {})));
+  assertions.push(assertion("architecture docs hook calls architecture-docs script", JSON.stringify(hookEntry ?? {}).includes("architecture-docs.mjs"), JSON.stringify(hookEntry ?? {})));
+
+  const scriptPath = path.join(repoRoot(), ".github", "hooks", "scripts", "architecture-docs.mjs");
+  const script = readTextIfExists(scriptPath);
+  assertions.push(assertion("architecture docs hook script exists", Boolean(script), scriptPath));
+  if (script) {
+    for (const phrase of ["keep-architecture-docs-current", "Mermaid diagrams", "architectureSignals", "userPrompt"]) {
+      assertions.push(assertion(`architecture docs hook script mentions ${phrase}`, hasPhrase(script, phrase), phrase));
+    }
+
+    const result = spawnSync(process.execPath, [scriptPath], {
+      input: JSON.stringify({
+        cwd: repoRoot(),
+        prompt: "Update the Microsoft Agent Framework architecture workflow and diagrams."
+      }),
+      encoding: "utf8"
+    });
+    assertions.push(assertion("architecture docs hook script exits successfully for architecture changes", result.status === 0, result.stderr || result.stdout));
+    assertions.push(assertion("architecture docs hook script invokes skill", hasPhrase(result.stdout, "invoke-skill") && hasPhrase(result.stdout, "keep-architecture-docs-current"), result.stdout));
+  }
+
+  const instructionPath = path.join(repoRoot(), ".github", "instructions", "architecture-docs.instructions.md");
+  const instruction = readTextIfExists(instructionPath);
+  assertions.push(assertion("architecture docs instruction exists", Boolean(instruction), instructionPath));
+  if (instruction) {
+    for (const phrase of ["$keep-architecture-docs-current", "architecture-affecting changes", "Mermaid diagrams", "implemented behavior"]) {
+      assertions.push(assertion(`architecture docs instruction mentions ${phrase}`, hasPhrase(instruction, phrase), phrase));
+    }
+  }
+
+  const packageJson = readTextIfExists(path.join(repoRoot(), "package.json")) ?? "";
+  assertions.push(assertion("skills validation includes architecture docs skill", hasPhrase(packageJson, "keep-architecture-docs-current"), "package.json"));
+
+  const architectureReadme = readTextIfExists(path.join(repoRoot(), "docs", "architecture", "README.md")) ?? "";
+  assertions.push(assertion("architecture overview documents current state", hasPhrase(architectureReadme, "Current Implementation") && hasPhrase(architectureReadme, "Mermaid"), "docs/architecture/README.md"));
+
+  return assertions;
+}
+
 function checkSteeringConsumption(state) {
   const steeringPath = path.join(repoRoot(), "STEERING.md");
   const steering = readTextIfExists(steeringPath);
@@ -1162,6 +1259,8 @@ function runCheck(checkName, state) {
       return checkRequestedToolingInstallation();
     case "learn-skill-hook":
       return checkLearnSkillAndHook();
+    case "architecture-docs-skill-hook":
+      return checkArchitectureDocsSkillAndHook();
     case "steering-consumption":
       return checkSteeringConsumption(state);
     case "agent-skills-spec-compliance":
@@ -1226,7 +1325,7 @@ function inferCheckName(payload) {
     ["frontmatter linter", "agent-frontmatter-lint"],
     ["explicit operating contracts", "bounded-agent-contracts"],
     ["tool access matches", "least-privilege-tools"],
-    ["docs branch modernization phases", "docs-branch-flow-coverage"],
+    ["implemented modernization phases", "docs-branch-flow-coverage"],
     ["baseline/candidate agentv iteration", "evolution-agent-agentv-tdd"],
     ["repeatable iteration discipline", "evolution-agent-iteration-discipline"],
     ["evidence reporting requirements", "evolution-agent-tdd-evidence"],
@@ -1236,6 +1335,7 @@ function inferCheckName(payload) {
     ["khepri-code.md and .github/agents/khepri-test.md", "tdd-agents-agent-evals"],
     ["installed project tooling", "requested-tooling-installation"],
     [".github/skills/learn and .github/hooks/learn.json", "learn-skill-hook"],
+    ["architecture documentation skill and hook", "architecture-docs-skill-hook"],
     ["inspect steering.md", "steering-consumption"],
     ["validate the learn skill folder", "agent-skills-spec-compliance"],
     ["validate .github/skills/spec-kit", "spec-kit-skill"],

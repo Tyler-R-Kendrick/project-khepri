@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "name": "keep-architecture-docs-current",
+        "bash": "node .github/hooks/scripts/architecture-docs.mjs",
+        "powershell": "node .github/hooks/scripts/architecture-docs.mjs",
+        "cwd": ".",
+        "timeoutSec": 10,
+        "comment": "architecture-docs: invoke keep-architecture-docs-current when architecture changes could stale docs or Mermaid diagrams"
+      }
+    ]
+  }
+}

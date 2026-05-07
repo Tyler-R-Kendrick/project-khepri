@@ -1,0 +1,4 @@
+interface:
+  display_name: "Keep Architecture Docs Current"
+  short_description: "Keep architecture docs and diagrams current"
+  default_prompt: "Use $keep-architecture-docs-current to update architecture documentation and Mermaid diagrams after architecture changes."

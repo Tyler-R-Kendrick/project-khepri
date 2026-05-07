@@ -76,6 +76,7 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Knowledge packets and runtime runbooks that explain how to install, simulate, emulate, run, and test the legacy and target systems.
 - Updates to `STEERING.md` that capture succinct generalized user corrections.
 - AgentV eval updates that test every new agent, skill, hook, and steering contract.
+- Architecture documentation and Mermaid diagram updates via `$keep-architecture-docs-current` whenever workflow, agent, skill, hook, MCP, eval, CI, or repository-structure changes affect current state.
 - Recommendation tables for candidate agents, skills, MCPs, tools, hooks, plugins, instructions, prompts, workflows, or other Copilot customizations that would improve modernization outcomes.
 - A short change summary with validation commands and any residual risk.
 
@@ -110,6 +111,7 @@ Stop iterating when the stop condition is met: the focused AgentV scenario is gr
 - Treat AgentV regressions as blockers until the failed scenario is understood, the eval is corrected, or the candidate is discarded.
 - Treat Awesome Copilot results as recommendations until the user approves adoption; verify license, security impact, tool access, and maintenance cost before adding anything to the repository.
 - Do not block the phase owner unless a safety, correctness, steering, or approval issue would make continued work harmful.
+- Invoke `$keep-architecture-docs-current` before completing architecture-affecting changes so docs and Mermaid diagrams describe the implemented architecture, not outdated plans.
 
 ## Handoffs
 Handoff runnable validation commands to the test agent. Handoff updated steering to all agents by ensuring their profiles reference `STEERING.md`. Handoff agent profile changes to the orchestrator when delegation order or phase ownership changes. Handoff unresolved skill-design questions to the planner before creating broad new skill surfaces. When running as the continuous improvement companion, hand off only decision-quality improvement findings that the orchestrator or phase owner can act on.

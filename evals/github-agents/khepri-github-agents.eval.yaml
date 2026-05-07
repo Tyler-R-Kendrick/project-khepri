@@ -31,7 +31,7 @@ tests:
           check: profile-schema
 
   - id: orchestration-subagents
-    criteria: The orchestration agent can invoke subagents, starts khepri-evolution as a continuous companion, and encodes the modernization sequence from the docs branch.
+    criteria: The orchestration agent can invoke subagents, starts khepri-evolution as a continuous companion, and encodes the implemented modernization sequence.
     input: Inspect the orchestrator profile for subagent delegation, parallel evolution, and phase order.
     expected_output:
       required_sequence:
@@ -110,8 +110,8 @@ tests:
           check: least-privilege-tools
 
   - id: docs-branch-flow-coverage
-    criteria: The custom agents cover the full modernization flow captured in the docs branch README sequence diagram.
-    input: Compare custom agent prompts to the docs branch modernization phases.
+    criteria: The custom agents cover the full implemented modernization flow captured in the current workflow docs and .NET contract.
+    input: Compare custom agent prompts to the implemented modernization phases.
     expected_output:
       phases:
         - legacy system IR collection
@@ -329,6 +329,22 @@ tests:
         cwd: ./evals/github-agents
         config:
           check: learn-skill-hook
+
+  - id: architecture-docs-skill-hook
+    criteria: The architecture documentation agent skill and GitHub hook require docs and Mermaid diagrams to stay aligned with implemented architecture changes.
+    input: Inspect the architecture documentation skill and hook.
+    expected_output:
+      skill: .github/skills/keep-architecture-docs-current/SKILL.md
+      hook: .github/hooks/architecture-docs.json
+      instructions: .github/instructions/architecture-docs.instructions.md
+      docs: docs/architecture/README.md
+    assertions:
+      - name: architecture-docs-skill-hook
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: architecture-docs-skill-hook
 
   - id: steering-consumption
     criteria: All Khepri custom agents use STEERING.md so chat corrections affect future work.

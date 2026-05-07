@@ -78,15 +78,18 @@ public sealed class ModernizationWorkflowTests
     }
 
     [TestMethod]
-    public void GitHubCopilotRegistryPreloadsTheWorkflowSkillForTheOrchestrator()
+    public void GitHubCopilotRegistryPreloadsWorkflowAndArchitectureDocsSkills()
     {
         var session = GitHubCopilotModernizationAgentRegistry.CreateSessionConfig(Environment.CurrentDirectory);
         var orchestrator = session.CustomAgents?.Single(agent => agent.Name == ModernizationWorkflow.OrchestratorAgentName);
+        var evolution = session.CustomAgents?.Single(agent => agent.Name == ModernizationWorkflow.EvolutionAgentName);
 
         Assert.IsNotNull(session.SkillDirectories);
         Assert.IsNotNull(orchestrator?.Skills);
         CollectionAssert.Contains(session.SkillDirectories?.ToArray(), ".github/skills");
-        CollectionAssert.Contains(orchestrator?.Skills?.ToArray(), "khepri-modernization-workflow");
+        CollectionAssert.Contains(orchestrator?.Skills?.ToArray(), ModernizationWorkflow.WorkflowSkillName);
+        CollectionAssert.Contains(orchestrator?.Skills?.ToArray(), ModernizationWorkflow.ArchitectureDocsSkillName);
+        CollectionAssert.Contains(evolution?.Skills?.ToArray(), ModernizationWorkflow.ArchitectureDocsSkillName);
     }
 
     [TestMethod]

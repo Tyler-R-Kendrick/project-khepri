@@ -1,42 +1,59 @@
-# GitHub Custom Agents
+# Project Khepri Custom Agents
 
-Project Khepri defines repository-level GitHub Copilot custom agents in `.github/agents`.
-The profiles formalize the docs-branch modernization flow as bounded subagents:
+Project Khepri defines repository-level GitHub Copilot custom agents in `.github/agents` and registers their runtime equivalents in `dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs`.
 
-- `khepri-orchestrator` coordinates the phase sequence and invokes subagents.
-- `khepri-spec` collects and generates intermediary representations.
-- `khepri-knowledge` indexes IR, business context, standards, and test results.
-- `khepri-planner` creates approval-ready regression, scaffolding, test, and implementation plans.
-- `khepri-scaffold` executes approved scaffolding and minimal type-signature plans.
-- `khepri-code` writes tests first, implements behavior, and handles test feedback.
-- `khepri-test` runs reproducible verification commands.
-- `khepri-modernization-assessor` checks parity, risk, and acceptance evidence.
-- `app-modernization` informs plans with application modernization patterns and when-to-use guidance.
-- `data-modernization` informs plans with data modernization patterns, migration gates, and regression checks.
-- `infra-modernization` informs plans with infrastructure modernization patterns, deployment gates, and rollback checks.
-- `khepri-evolution` creates and improves project agents, Agent Skills, hooks, MCP servers, evals, steering, and techstack-specific modernization expertise.
+## Implemented Agents
 
-## Current Execution Model
+| Agent | Role | Edit access |
+| --- | --- | --- |
+| `khepri-orchestrator` | Coordinates the workflow and delegates bounded phases. | No |
+| `khepri-evolution` | Improves agents, skills, hooks, MCP recommendations, evals, docs, and steering while phase work proceeds. | Yes |
+| `khepri-spec` | Extracts or generates requirements, specs, tests, and test plans from legacy and target systems. | Yes |
+| `khepri-knowledge` | Indexes IR, business context, standards, and verification evidence. | Yes |
+| `khepri-planner` | Creates incremental and stage-ready modernization plans. | Yes |
+| `khepri-scaffold` | Executes approved scaffolding and minimal type-signature plans. | Yes |
+| `khepri-code` | Implements approved behavior with tests first. | Yes |
+| `khepri-test` | Runs reproducible verification commands. | No |
+| `khepri-modernization-assessor` | Assesses parity, risk, acceptance evidence, and unresolved gaps. | No |
+| `app-modernization` | Advises on application modernization patterns. | No |
+| `data-modernization` | Advises on data modernization patterns. | No |
+| `infra-modernization` | Advises on infrastructure modernization patterns. | No |
 
-The orchestrator starts `khepri-evolution` first using frontmatter handoffs, then invokes
-the phase owner for the active modernization step. `khepri-evolution` stays alongside
-that work as a non-blocking companion unless it finds a safety, correctness, steering,
-or approval issue that needs user attention.
+Frontmatter correctness and least-privilege tool access are checked by `npm run lint:agents` and `npm run eval:agents`.
 
-The same contract is enforced in code by `dotnet/src/Modernization/Workflow`. That
-project uses `GitHub.Copilot.SDK`, `Microsoft.Agents.AI.GitHub.Copilot`, and
-`Microsoft.Agents.AI.Workflows` to register GitHub Copilot custom agents as Microsoft
-Agent Framework `AIAgent` instances, build the high-level sequential workflow, and build
-per-increment concurrent app/data/infra squad workflows. The squad stage carries
-explicit AgentEvals-style `tool_trajectory` and `llm_judge` relevance requirements.
+## Runtime Source Of Truth
 
-Legacy sample packs in `evals/legacy-samples` give the agents concrete regression
-fixtures for COBOL claims batch/CICS, legacy .NET Framework claims portal, and Java
-payment monolith scenarios. Each pack includes source-shaped artifacts, edge-case
-fixtures, expected outputs, and a replay command. Agents should cite those packs as
-sample-pack evidence only when they map to the active legacy system, and generated
-squads must preserve the replay command, edge-case fixture, and regression evidence
-through planning, TDD, and assessment.
+The .NET registry currently:
+
+- creates `CustomAgentConfig` entries for every required Khepri agent;
+- sets `khepri-orchestrator` as the default session agent;
+- enables subagent streaming;
+- loads `.github/skills` and `.copilot/skills`;
+- preloads `khepri-modernization-workflow` and `keep-architecture-docs-current` for the orchestrator;
+- preloads `keep-architecture-docs-current` for `khepri-evolution`;
+- builds Microsoft Agent Framework `AIAgent` wrappers around the GitHub Copilot SDK agents.
+
+```mermaid
+flowchart LR
+    profiles[".github/agents/*.md"] --> grader["AgentV code-grader"]
+    workflow["ModernizationWorkflow.cs"] --> registry["GitHubCopilotModernizationAgentRegistry.cs"]
+    skills[".github/skills"] --> registry
+    registry --> session["GitHub Copilot SDK SessionConfig"]
+    session --> maf["Microsoft Agent Framework AIAgent map"]
+    maf --> seq["sequential workflow"]
+    maf --> squads["concurrent app/data/infra squad workflow"]
+```
+
+## Workflow Handoffs
+
+The orchestrator starts `khepri-evolution` first, then delegates the active phase. The implemented high-level order is:
+
+1. Legacy requirements, specs, and regression seed tests.
+2. Target requirements, specs, and test plans.
+3. Incremental modernization planning.
+4. App/data/infra squad generation with AgentEvals gates.
+5. Current-stage plan refinement.
+6. TDD modernization execution and assessment.
 
 ```mermaid
 sequenceDiagram
@@ -44,95 +61,47 @@ sequenceDiagram
     participant evo as khepri-evolution
     participant phase as Active phase agent
     participant test as khepri-test
-    participant user as User
+    participant assess as khepri-modernization-assessor
 
-    user->>orch: request modernization work
     orch->>evo: Start Continuous Evolution
-    orch->>phase: hand off active phase
-    phase-->>orch: return artifacts and evidence
-    evo-->>orch: return improvement findings and approved changes
-    orch->>test: run verification when needed
+    orch->>phase: Hand off current workflow stage
+    phase-->>orch: Return artifacts, evidence, and gaps
+    orch->>test: Run focused and broad verification
+    test-->>orch: Return command, exit code, and evidence
+    orch->>assess: Assess parity, risk, and acceptance readiness
+    evo-->>orch: Return approved durable improvements
 ```
 
-`khepri-evolution` runs alongside all other agent work as the workflow's continuous
-improvement companion. The orchestrator starts it first, then keeps it informed about
-phase handoffs, evidence, failures, and user corrections so parallel improvement keeps
-the agent system getting better while modernization work proceeds.
+GitHub custom-agent frontmatter uses the official `handoffs` object shape. GitHub.com may not expose every IDE handoff affordance yet, but keeping the frontmatter current preserves compatibility and keeps the contract machine-checkable.
 
-`khepri-evolution` also has the official Awesome Copilot MCP server configured as
-`awesome-copilot/*`. It uses that server to recommend agents, skills, MCPs, tools,
-hooks, plugins, instructions, prompts, workflows, and other Copilot customizations
-that could improve modernization outcomes. Recommendations stay advisory until the
-user approves a specific candidate to inspect, install, or adapt.
+## Skills And Hooks Used By Agents
 
-When repeated modernization work depends on a particular legacy or target stack,
-`khepri-evolution` is responsible for proposing or creating durable specialization:
-techstack-specific agents for bounded expert roles, techstack-specific skills for
-repeatable procedures, hooks for deterministic automation, and MCP servers for
-reusable tool access. Each specialist should maintain knowledge packets and runtime
-runbooks that cover installation commands, test commands, real runtime execution,
-simulation harnesses, emulation harnesses, parity checks, and acceptance evidence.
-AgentV evidence should drive whether specialists are expanded, retired, merged, or
-narrowed.
+- `khepri-modernization-workflow`: entrypoint for the .NET workflow source of truth.
+- `learn`: captures user corrections into `STEERING.md`.
+- `keep-architecture-docs-current`: required for architecture-affecting changes so docs and Mermaid diagrams match implementation.
+- `spec-kit`: local Spec Kit and Specify CLI guidance.
 
-Evolution changes are expected to proceed in several small improvement iterations
-when the workflow gap is not obvious. Each iteration records a hypothesis, expected
-score movement, baseline and candidate scores, changed files, rollback plan, stop
-condition, residual risk, and next experiment. AgentV TDD evidence should include
-the red command and green command, exit status, focused check, artifact path when
-available, and broader validation command without weakening assertions.
+Hooks under `.github/hooks` provide deterministic reminders and lightweight capture:
 
-When `khepri-evolution` creates a specialist surface, it should use explicit
-artifact checklists: agent profile checklist, skill authoring checklist, hook
-automation checklist, MCP server contract, shared evaluation scenarios, security
-review, maintenance owner, and deprecation signal.
+- `learn.json` writes generalized corrections through `learn.mjs`.
+- `architecture-docs.json` emits an instruction to invoke `$keep-architecture-docs-current` when prompts indicate architecture-affecting changes.
 
-All agents read `STEERING.md` before phase work. User corrections are captured by the
-`learn` Agent Skill in `.github/skills/learn` and the `learn` GitHub hook in
-`.github/hooks/learn.json`.
+## Steering
 
-Workflow orchestration is encoded in each agent profile's YAML frontmatter with the
-official custom-agent `handoffs` object syntax:
+All Khepri agents read `STEERING.md` before phase work. Corrections should be succinct, generalized, and free of secrets or long transcripts. If a correction implies a reusable workflow, `khepri-evolution` should add or update the relevant skill, hook, eval, or instruction.
 
-```yaml
-handoffs:
-  - label: Run Verification
-    agent: khepri-test
-    prompt: Run the required Project Khepri verification commands.
-    send: false
-```
+## Validation
 
-GitHub's cloud-agent reference currently accepts the field for compatibility but notes
-that GitHub.com ignores IDE handoff buttons today. Keeping the frontmatter current makes
-the workflow usable in IDE custom agents now and ready for GitHub.com support later.
-
-Frontmatter correctness is enforced by:
+Run these checks after agent, skill, hook, instruction, eval, or workflow changes:
 
 ```powershell
 npm run lint:agents
-```
-
-The AgentEvals/AgentV suite is in `evals/github-agents/khepri-github-agents.eval.yaml`.
-Run it with:
-
-```powershell
-npm run eval:agents
-```
-
-Validate the eval definition with:
-
-```powershell
 npm run eval:agents:validate
-```
-
-Validate the AgentV target file and project skill metadata with:
-
-```powershell
-npx agentv validate .agentv\targets.yaml --max-warnings 0
+npm run eval:agents
 npm run skills:validate
 ```
 
-Run the current .NET smoke test with:
+Run the .NET workflow tests after changing the workflow contract, registry, or workflow skill behavior:
 
 ```powershell
 $env:DOTNET_ROLL_FORWARD='Major'; dotnet test dotnet\tests\Code2\NL\Code2NL.Tests.csproj

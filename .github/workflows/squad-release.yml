@@ -22,24 +22,37 @@ jobs:
       - name: Run tests
         run: node --test test/*.test.cjs
 
-      - name: Validate version consistency
+      - name: Detect release version
+        id: version
         run: |
-          VERSION=$(node -e "console.log(require('./package.json').version)")
+          VERSION=$(node -e "const pkg=require('./package.json'); console.log(pkg.version || '')")
+          if [ -z "$VERSION" ]; then
+            echo "has_version=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json version is defined; skipping release publication for this private workspace package."
+            exit 0
+          fi
+          echo "has_version=true" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Package version: $VERSION"
+
+      - name: Validate version consistency
+        if: steps.version.outputs.has_version == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
           if ! grep -q "## \[$VERSION\]" CHANGELOG.md 2>/dev/null; then
             echo "::error::Version $VERSION not found in CHANGELOG.md — update CHANGELOG.md before release"
             exit 1
           fi
           echo "✅ Version $VERSION validated in CHANGELOG.md"
 
-      - name: Read version from package.json
-        id: version
+      - name: Report skipped release
+        if: steps.version.outputs.has_version != 'true'
         run: |
-          VERSION=$(node -e "console.log(require('./package.json').version)")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "📦 Version: $VERSION (tag: v$VERSION)"
+          echo "✅ Release skipped because package.json has no version field."
 
       - name: Check if tag already exists
+        if: steps.version.outputs.has_version == 'true'
         id: check_tag
         run: |
           if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
@@ -51,7 +64,7 @@ jobs:
           fi
 
       - name: Create git tag
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.version.outputs.has_version == 'true' && steps.check_tag.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -59,7 +72,7 @@ jobs:
           git push origin "${{ steps.version.outputs.tag }}"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.version.outputs.has_version == 'true' && steps.check_tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -69,7 +82,7 @@ jobs:
             --latest
 
       - name: Verify release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.version.outputs.has_version == 'true' && steps.check_tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

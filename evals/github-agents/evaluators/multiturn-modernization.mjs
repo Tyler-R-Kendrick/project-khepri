@@ -82,7 +82,7 @@ function inferScenario(currentPayload) {
     return {
       scenario: "mixed-legacy-estate-increment",
       required_turns: 3,
-      expected_agents: ["khepri-spec", "khepri-knowledge", "app-modernization", "data-modernization", "infra-modernization", "khepri-planner", "khepri-test"],
+      expected_agents: ["khepri-spec", "khepri-knowledge", "app-modernization", "data-modernization", "infra-modernization", "security-modernization", "khepri-planner", "khepri-test"],
       required_context_terms: ["COBOL eligibility batch", ".NET Framework claims portal", "Java payment monolith", "packed decimals", "COM interop", "machine.config drift", "JMS replay", "transaction boundaries"]
     };
   }

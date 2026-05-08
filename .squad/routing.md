@@ -8,7 +8,8 @@
 ## Rules
 
 - `modernization|migration|upgrade|roadmap|decomposition|phase plan|technical debt` → @planner, @evolution — Planner scopes the effort while evolution generates the specialist squad design.
-- `squad.config|agent|routing|ceremony|skill|team design|model selection` → @evolution, @planner — SDK-first squad structure belongs to evolution with planner review.
+- `squad generation|squad-generator|live-evals|rubric adherence|agent evals|agentv|evaluator|test data` → @squad-generator, @tester, @planner — Dedicated SDK-first squad generator owns AgentEvals, evaluators, test data, live-evals, and rubric-backed improvement loops.
+- `squad.config|agent|routing|ceremony|skill|team design|model selection` → @squad-generator, @evolution, @planner — SDK-first squad structure belongs to the squad generator with evolution and planner review.
 - `legacy|compatibility|behavior|dependency map|codebase review|discovery` → @archaeologist, @tester — Discover current behavior and test seams before changes.
 - `refactor|codemod|cleanup|type cleanup|framework migration` → @refactor, @tester — Small behavior-preserving changes with regression coverage.
 - `test|coverage|characterization|regression|verify|ci gate` → @tester — Testing and proof work routes to tester.

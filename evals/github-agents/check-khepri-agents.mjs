@@ -19,7 +19,9 @@ const expectedAgents = {
       "app-modernization",
       "data-modernization",
       "infra-modernization",
+      "security-modernization",
       "khepri-planner",
+      "khepri-squad-generator",
       "khepri-scaffold",
       "khepri-code",
       "khepri-test",
@@ -40,6 +42,24 @@ const expectedAgents = {
     tools: ["read", "search", "edit", "agent", "github/*"],
     sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
     mentions: ["approval", "regression suite", "scaffolding plan", "implementation plan"]
+  },
+  "khepri-squad-generator": {
+    tools: ["read", "search", "edit", "execute", "agent", "github/*"],
+    sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
+    mentions: [
+      "SDK-first squad",
+      "squad.config.ts",
+      "AgentEvals",
+      "AgentV",
+      "evaluators",
+      "test data",
+      "squad members",
+      "rubric",
+      "live-evals",
+      "multiple improvement loops",
+      "steer too far",
+      "rubric adherence"
+    ]
   },
   "khepri-scaffold": {
     tools: ["read", "search", "edit", "execute"],
@@ -75,6 +95,11 @@ const expectedAgents = {
     tools: ["read", "search", "agent", "github/*"],
     sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
     mentions: ["infrastructure as code", "blue-green", "observability", "when to use"]
+  },
+  "security-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    sections: ["Mission", "Inputs", "Outputs", "Guardrails", "Handoffs"],
+    mentions: ["threat modeling", "identity and access", "secrets", "vulnerability", "security regression", "when to use"]
   },
   "khepri-evolution": {
     tools: ["read", "search", "edit", "execute", "agent", "github/*", "awesome-copilot/*"],
@@ -765,6 +790,258 @@ function checkTddAgentsAgentEvals(state) {
   return assertions;
 }
 
+function checkSquadGeneratorAgent(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-squad-generator");
+  assertions.push(assertion("khepri-squad-generator profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  const tools = normalizeTools(profile.frontmatter.tools);
+  assertions.push(assertion("khepri-squad-generator can edit generated artifacts", tools.includes("edit"), tools.join(", ")));
+  assertions.push(assertion("khepri-squad-generator can run eval and build commands", tools.includes("execute"), tools.join(", ")));
+  assertions.push(assertion("khepri-squad-generator can request bounded subagent review", tools.includes("agent"), tools.join(", ")));
+
+  for (const phrase of [
+    "SDK-first squad",
+    "squad.config.ts",
+    "AgentEvals",
+    "AgentV",
+    "generated AgentV scenarios",
+    "evaluators",
+    "test data",
+    "squad members",
+    "squad member rubric",
+    "rubric adherence",
+    "live-evals",
+    "test/dev loop",
+    "multiple improvement loops",
+    "steer too far",
+    "improve squad members",
+    "RED evidence",
+    "GREEN evidence"
+  ]) {
+    assertions.push(assertion(`khepri-squad-generator covers ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkSquadGenerationRubricLiveEvalLoop(state) {
+  const assertions = [];
+  const generator = state.profiles.get("khepri-squad-generator");
+  const planner = state.profiles.get("khepri-planner");
+  const code = state.profiles.get("khepri-code");
+  const test = state.profiles.get("khepri-test");
+  const orchestrator = state.profiles.get("khepri-orchestrator");
+  assertions.push(assertion("khepri-squad-generator profile exists", Boolean(generator), generator?.filePath));
+  assertions.push(assertion("khepri-planner profile exists", Boolean(planner), planner?.filePath));
+  assertions.push(assertion("khepri-code profile exists", Boolean(code), code?.filePath));
+  assertions.push(assertion("khepri-test profile exists", Boolean(test), test?.filePath));
+  assertions.push(assertion("khepri-orchestrator profile exists", Boolean(orchestrator), orchestrator?.filePath));
+
+  const combinedText = [
+    generator?.prompt ?? "",
+    planner?.prompt ?? "",
+    code?.prompt ?? "",
+    test?.prompt ?? "",
+    orchestrator?.prompt ?? ""
+  ].join("\n");
+
+  for (const phrase of [
+    "squad generation loop",
+    "TDD using AgentEvals",
+    "write scenarios first",
+    "generated AgentV scenarios",
+    "evaluators",
+    "test data",
+    "squad members",
+    "squad member rubric",
+    "live-evals",
+    "test/dev loop",
+    "steer too far",
+    "improve squad members",
+    "multiple improvement loops",
+    "focused rerun",
+    "broader validation"
+  ]) {
+    assertions.push(assertion(`squad generation loop covers ${phrase}`, hasPhrase(combinedText, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkSdkSquadGeneratorConfig() {
+  const root = repoRoot();
+  const configPath = path.join(root, "squad.config.ts");
+  const config = readTextIfExists(configPath) ?? "";
+  const assertions = [
+    assertion("squad.config.ts exists", existsSync(configPath), configPath)
+  ];
+
+  for (const phrase of [
+    "defineSquad",
+    "defineAgent",
+    "squad-generator",
+    "SDK-first squad",
+    "AgentEvals",
+    "evaluators",
+    "test data",
+    "squad member rubric",
+    "live-evals",
+    "multiple improvement loops",
+    "rubric adherence"
+  ]) {
+    assertions.push(assertion(`SDK squad config covers ${phrase}`, hasPhrase(config, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkSecurityModernizationPatternAgent(state) {
+  const assertions = [];
+  const profile = state.profiles.get("security-modernization");
+  assertions.push(assertion("security-modernization profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const combinedText = `${JSON.stringify(profile.frontmatter)}\n${profile.prompt}`;
+  for (const phrase of [
+    "threat modeling",
+    "identity and access",
+    "secrets rotation",
+    "vulnerability remediation",
+    "compliance",
+    "security regression checks",
+    "compensating controls",
+    "rollback",
+    "khepri-planner",
+    "khepri-modernization-assessor",
+    "evals/legacy-samples",
+    "generated squad"
+  ]) {
+    assertions.push(assertion(`security-modernization covers ${phrase}`, hasPhrase(combinedText, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkKnowledgeAgentQueryableKbToolDiscovery(state) {
+  const assertions = [];
+  const profile = state.profiles.get("khepri-knowledge");
+  assertions.push(assertion("khepri-knowledge profile exists", Boolean(profile), profile?.filePath));
+  if (!profile) {
+    return assertions;
+  }
+
+  const prompt = profile.prompt;
+  for (const phrase of [
+    "queryable knowledge base",
+    "available knowledge-modeling capabilities",
+    "MCP servers",
+    "tools",
+    "skills",
+    "wiki",
+    "database",
+    "graph",
+    "without requiring the user to name",
+    "select the best available capability",
+    "fallback repository-owned knowledge manifest",
+    "query smoke check",
+    "record the selected capability"
+  ]) {
+    assertions.push(assertion(`khepri-knowledge discovers queryable KB tooling: ${phrase}`, hasPhrase(prompt, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkKnowledgeAgentLegacyKbModeling(state) {
+  const assertions = [];
+  const knowledge = state.profiles.get("khepri-knowledge");
+  const spec = state.profiles.get("khepri-spec");
+  const orchestrator = state.profiles.get("khepri-orchestrator");
+  assertions.push(assertion("khepri-knowledge profile exists", Boolean(knowledge), knowledge?.filePath));
+  assertions.push(assertion("khepri-spec profile exists", Boolean(spec), spec?.filePath));
+  assertions.push(assertion("khepri-orchestrator profile exists", Boolean(orchestrator), orchestrator?.filePath));
+
+  const combinedText = `${knowledge?.prompt ?? ""}\n${spec?.prompt ?? ""}\n${orchestrator?.prompt ?? ""}`;
+  for (const phrase of [
+    "legacy knowledge extraction",
+    "legacy knowledge generation",
+    "source-backed requirements",
+    "intermediary representations",
+    "regression seed tests",
+    "queryable knowledge base",
+    "legacy-requirements-specs-tests",
+    "handoff to the knowledge agent"
+  ]) {
+    assertions.push(assertion(`legacy knowledge modeling covers ${phrase}`, hasPhrase(combinedText, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkKnowledgeAgentTargetKbModeling(state) {
+  const assertions = [];
+  const knowledge = state.profiles.get("khepri-knowledge");
+  const spec = state.profiles.get("khepri-spec");
+  const orchestrator = state.profiles.get("khepri-orchestrator");
+  assertions.push(assertion("khepri-knowledge profile exists", Boolean(knowledge), knowledge?.filePath));
+  assertions.push(assertion("khepri-spec profile exists", Boolean(spec), spec?.filePath));
+  assertions.push(assertion("khepri-orchestrator profile exists", Boolean(orchestrator), orchestrator?.filePath));
+
+  const combinedText = `${knowledge?.prompt ?? ""}\n${spec?.prompt ?? ""}\n${orchestrator?.prompt ?? ""}`;
+  for (const phrase of [
+    "desired-state knowledge extraction",
+    "desired-state knowledge generation",
+    "target requirements",
+    "target specs",
+    "test-PLANS",
+    "acceptance criteria",
+    "queryable knowledge base",
+    "target-requirements-specs-test-plans",
+    "handoff to the knowledge agent"
+  ]) {
+    assertions.push(assertion(`target knowledge modeling covers ${phrase}`, hasPhrase(combinedText, phrase), phrase));
+  }
+
+  return assertions;
+}
+
+function checkKnowledgeAgentRefinementLoop(state) {
+  const assertions = [];
+  const knowledge = state.profiles.get("khepri-knowledge");
+  const test = state.profiles.get("khepri-test");
+  const evolution = state.profiles.get("khepri-evolution");
+  const orchestrator = state.profiles.get("khepri-orchestrator");
+  assertions.push(assertion("khepri-knowledge profile exists", Boolean(knowledge), knowledge?.filePath));
+  assertions.push(assertion("khepri-test profile exists", Boolean(test), test?.filePath));
+  assertions.push(assertion("khepri-evolution profile exists", Boolean(evolution), evolution?.filePath));
+  assertions.push(assertion("khepri-orchestrator profile exists", Boolean(orchestrator), orchestrator?.filePath));
+
+  const combinedText = `${knowledge?.prompt ?? ""}\n${test?.prompt ?? ""}\n${evolution?.prompt ?? ""}\n${orchestrator?.prompt ?? ""}`;
+  for (const phrase of [
+    "intra modernization",
+    "dev/test loops",
+    "refine the knowledge base",
+    "test feedback",
+    "verification evidence",
+    "steering behaviors",
+    "STEERING.md",
+    "learn",
+    "queryable knowledge base",
+    "red/green/refactor"
+  ]) {
+    assertions.push(assertion(`knowledge refinement loop covers ${phrase}`, hasPhrase(combinedText, phrase), phrase));
+  }
+
+  return assertions;
+}
+
 function checkRequestedToolingInstallation() {
   const root = repoRoot();
   const assertions = [];
@@ -1174,7 +1451,8 @@ function checkMafGhcpModernizationWorkflow(state) {
     "khepri-evolution",
     "app-modernization",
     "data-modernization",
-    "infra-modernization"
+    "infra-modernization",
+    "security-modernization"
   ]) {
     assertions.push(assertion(`workflow registers/calls ${agentName}`, hasPhrase(workflowText, agentName), agentName));
   }
@@ -1182,7 +1460,8 @@ function checkMafGhcpModernizationWorkflow(state) {
   for (const [agentName, phrases] of Object.entries({
     "app-modernization": ["strangler", "branch by abstraction", "contract tests", "when to use"],
     "data-modernization": ["expand/contract", "dual-write", "CDC", "when to use"],
-    "infra-modernization": ["infrastructure as code", "blue-green", "observability", "when to use"]
+    "infra-modernization": ["infrastructure as code", "blue-green", "observability", "when to use"],
+    "security-modernization": ["threat modeling", "identity and access", "vulnerability remediation", "security regression", "when to use"]
   })) {
     const profile = state.profiles.get(agentName);
     assertions.push(assertion(`${agentName}.md exists`, Boolean(profile), profile?.filePath));
@@ -1255,6 +1534,22 @@ function runCheck(checkName, state) {
       return checkEvolutionAgentSpecialistArtifactCoverage(state);
     case "tdd-agents-agent-evals":
       return checkTddAgentsAgentEvals(state);
+    case "security-modernization-pattern-agent":
+      return checkSecurityModernizationPatternAgent(state);
+    case "squad-generator-agent":
+      return checkSquadGeneratorAgent(state);
+    case "squad-generation-rubric-live-eval-loop":
+      return checkSquadGenerationRubricLiveEvalLoop(state);
+    case "sdk-squad-generator-config":
+      return checkSdkSquadGeneratorConfig();
+    case "knowledge-agent-queryable-kb-tool-discovery":
+      return checkKnowledgeAgentQueryableKbToolDiscovery(state);
+    case "knowledge-agent-legacy-kb-modeling":
+      return checkKnowledgeAgentLegacyKbModeling(state);
+    case "knowledge-agent-target-kb-modeling":
+      return checkKnowledgeAgentTargetKbModeling(state);
+    case "knowledge-agent-refinement-loop":
+      return checkKnowledgeAgentRefinementLoop(state);
     case "requested-tooling-installation":
       return checkRequestedToolingInstallation();
     case "learn-skill-hook":
@@ -1333,6 +1628,13 @@ function inferCheckName(payload) {
     ["required checklists before creating techstack-specific", "evolution-agent-specialist-artifact-coverage"],
     ["agent-eval scenario authoring responsibilities", "spec-agent-agent-eval-contract"],
     ["khepri-code.md and .github/agents/khepri-test.md", "tdd-agents-agent-evals"],
+    ["khepri-squad-generator.md", "squad-generator-agent"],
+    ["rubric-backed live-eval loop", "squad-generation-rubric-live-eval-loop"],
+    ["sdk-first squad generator", "sdk-squad-generator-config"],
+    ["queryable knowledge-base capability discovery", "knowledge-agent-queryable-kb-tool-discovery"],
+    ["legacy knowledge extraction and generation", "knowledge-agent-legacy-kb-modeling"],
+    ["desired-state knowledge extraction and generation", "knowledge-agent-target-kb-modeling"],
+    ["intra-modernization knowledge refinement", "knowledge-agent-refinement-loop"],
     ["installed project tooling", "requested-tooling-installation"],
     [".github/skills/learn and .github/hooks/learn.json", "learn-skill-hook"],
     ["architecture documentation skill and hook", "architecture-docs-skill-hook"],

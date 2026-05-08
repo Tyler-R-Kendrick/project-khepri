@@ -56,25 +56,33 @@ flowchart TB
 
 | Order | Stage id | Required agents | Required evidence |
 | --- | --- | --- | --- |
-| 1 | `legacy-requirements-specs-tests` | `khepri-spec`, `khepri-knowledge`, `khepri-test` | Source evidence, legacy behavior inventory, legacy regression seed tests |
-| 2 | `target-requirements-specs-test-plans` | `khepri-spec`, `khepri-knowledge`, `khepri-planner` | Target desired-state evidence, acceptance criteria, test-PLANS |
-| 3 | `incremental-modernization-plan` | `khepri-planner`, `app-modernization`, `data-modernization`, `infra-modernization` | Increment map, area risks, approval checkpoints |
-| 4 | `increment-area-squads` | Area modernization agents, `khepri-code`, `khepri-test` | AgentEvals, `tool_trajectory`, `llm_judge` relevance evidence |
-| 5 | `current-stage-plan-refinement` | `khepri-planner`, area modernization agents | Stage-ready plan, dependencies, rollback plan, regression gates |
-| 6 | `tdd-modernization-execution` | `khepri-code`, `khepri-test`, `khepri-modernization-assessor` | Legacy regression checks, red/green/refactor evidence, AgentEvals rerun, acceptance evidence |
+| 1 | `legacy-requirements-specs-tests` | `khepri-spec`, `khepri-knowledge`, `khepri-test` | Source evidence, legacy behavior inventory, legacy regression seed tests, legacy queryable knowledge base |
+| 2 | `target-requirements-specs-test-plans` | `khepri-spec`, `khepri-knowledge`, `khepri-planner` | Target desired-state evidence, acceptance criteria, test-PLANS, target queryable knowledge base |
+| 3 | `incremental-modernization-plan` | `khepri-planner`, `app-modernization`, `data-modernization`, `infra-modernization`, `security-modernization` | Increment map, area risks, security risks, approval checkpoints |
+| 4 | `increment-area-squads` | `khepri-squad-generator`, area modernization agents, `khepri-code`, `khepri-test` | AgentEvals, `tool_trajectory`, `llm_judge`, SDK-first squad, generated AgentV scenarios, evaluators, test data, squad member rubric, live-evals |
+| 5 | `current-stage-plan-refinement` | `khepri-knowledge`, `khepri-planner`, area modernization agents, `security-modernization` | Knowledge refinement, stage-ready plan, dependencies, rollback plan, regression gates |
+| 6 | `tdd-modernization-execution` | `khepri-knowledge`, `khepri-code`, `khepri-test`, `khepri-modernization-assessor` | Legacy regression checks, red/green/refactor evidence, knowledge refinement, AgentEvals rerun, acceptance evidence |
 
 ```mermaid
 flowchart LR
     legacy["legacy-requirements-specs-tests"]
     target["target-requirements-specs-test-plans"]
+    knowledge["queryable knowledge base"]
     increment["incremental-modernization-plan"]
     squads["increment-area-squads"]
     refine["current-stage-plan-refinement"]
     execute["tdd-modernization-execution"]
 
     legacy --> target --> increment --> squads --> refine --> execute
+    legacy --> knowledge
+    target --> knowledge
+    refine --> knowledge
+    execute --> knowledge
+    knowledge --> refine
     squads --> tool["tool_trajectory eval"]
     squads --> judge["llm_judge relevance eval"]
+    squads --> live["rubric live_eval"]
+    squads --> sdk["SDK-first squad.config.ts"]
     execute --> parity["parity and acceptance assessment"]
 ```
 
@@ -90,6 +98,10 @@ flowchart LR
 - repo custom agents from the registry.
 
 The orchestrator preloads `khepri-modernization-workflow` and `keep-architecture-docs-current`. The evolution agent also preloads `keep-architecture-docs-current` so workflow-surface changes include docs and Mermaid updates.
+
+The knowledge agent is the implemented queryable knowledge-base owner. It discovers available knowledge-modeling capabilities in the active workflow, including configured tools, skills, MCP servers, wiki surfaces, databases, graph stores, and repository-local manifests. It records the selected capability and query smoke check so later planning, coding, and assessment agents can retrieve source-backed legacy facts, desired-state facts, and verification evidence.
+
+The squad generator is the implemented SDK-first squad-generation owner. It updates `squad.config.ts`, writes AgentV scenarios before squad member changes, creates evaluators and test data, defines a squad member rubric, and runs live-evals in the test/dev loop. Generated squad members are improved through multiple focused loops when they steer too far from their rubric.
 
 ## Skills, Hooks, And Instructions
 

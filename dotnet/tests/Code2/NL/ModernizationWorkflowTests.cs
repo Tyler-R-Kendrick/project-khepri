@@ -35,8 +35,8 @@ public sealed class ModernizationWorkflowTests
         var squadStage = contract.Stages.Single(stage => stage.Id == "increment-area-squads");
 
         CollectionAssert.AreEquivalent(
-            new[] { ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra },
-            squadStage.Areas.ToArray());
+            new[] { "App", "Data", "Infra", "Security" },
+            squadStage.Areas.Select(area => area.ToString()).ToArray());
         Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("AgentEvals", StringComparison.Ordinal)));
         Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("tool-calling", StringComparison.Ordinal)));
         Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("relevance", StringComparison.Ordinal)));
@@ -53,6 +53,27 @@ public sealed class ModernizationWorkflowTests
     }
 
     [TestMethod]
+    public void SquadGenerationStageUsesDedicatedAgentEvalTddGenerator()
+    {
+        var contract = ModernizationWorkflow.CreateContract();
+        var squadStage = contract.Stages.Single(stage => stage.Id == "increment-area-squads");
+
+        CollectionAssert.Contains(contract.RegisteredAgents.ToArray(), "khepri-squad-generator");
+        CollectionAssert.Contains(squadStage.RequiredAgents.ToArray(), "khepri-squad-generator");
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("SDK-first squad", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("generated AgentV scenarios", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("evaluators", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("test data", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("squad member rubric", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("multiple improvement loops", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("live-evals", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStage.RequiredEvidence.Any(item => item.Contains("steer too far", StringComparison.OrdinalIgnoreCase)));
+
+        Assert.IsTrue(squadStage.RequiredAgentEvals.Any(eval => eval.Name == "squad-member-rubric" && eval.EvaluatorType == "llm_judge"));
+        Assert.IsTrue(squadStage.RequiredAgentEvals.Any(eval => eval.Name == "rubric-live-eval" && eval.EvaluatorType == "live_eval"));
+    }
+
+    [TestMethod]
     public void ExecutionStageKeepsLegacyRegressionChecksInTheTddLoop()
     {
         var contract = ModernizationWorkflow.CreateContract();
@@ -60,6 +81,60 @@ public sealed class ModernizationWorkflowTests
 
         Assert.IsTrue(executionStage.RequiredEvidence.Any(item => item.Contains("legacy regression", StringComparison.Ordinal)));
         Assert.IsTrue(executionStage.RequiredEvidence.Any(item => item.Contains("red/green/refactor", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public void KnowledgeAgentIsRequiredForQueryableLegacyTargetAndRefinementKnowledge()
+    {
+        var contract = ModernizationWorkflow.CreateContract();
+        var legacyStage = contract.Stages.Single(stage => stage.Id == "legacy-requirements-specs-tests");
+        var targetStage = contract.Stages.Single(stage => stage.Id == "target-requirements-specs-test-plans");
+        var refinementStage = contract.Stages.Single(stage => stage.Id == "current-stage-plan-refinement");
+        var executionStage = contract.Stages.Single(stage => stage.Id == "tdd-modernization-execution");
+
+        CollectionAssert.Contains(legacyStage.RequiredAgents.ToArray(), ModernizationWorkflow.KnowledgeAgentName);
+        CollectionAssert.Contains(targetStage.RequiredAgents.ToArray(), ModernizationWorkflow.KnowledgeAgentName);
+        CollectionAssert.Contains(refinementStage.RequiredAgents.ToArray(), ModernizationWorkflow.KnowledgeAgentName);
+        CollectionAssert.Contains(executionStage.RequiredAgents.ToArray(), ModernizationWorkflow.KnowledgeAgentName);
+
+        Assert.IsTrue(legacyStage.RequiredEvidence.Any(item => item.Contains("queryable knowledge base", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(targetStage.RequiredEvidence.Any(item => item.Contains("queryable knowledge base", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(refinementStage.RequiredEvidence.Any(item => item.Contains("knowledge refinement", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(executionStage.RequiredEvidence.Any(item => item.Contains("knowledge refinement", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public void GitHubCopilotRegistryPromptsKnowledgeAgentToModelQueryableKnowledgeBase()
+    {
+        var configs = GitHubCopilotModernizationAgentRegistry.CreateCustomAgentConfigs();
+        var knowledgeAgent = configs.Single(config => config.Name == ModernizationWorkflow.KnowledgeAgentName);
+
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("queryable knowledge base", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("available knowledge-modeling capabilities", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("MCP", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("wiki", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("database", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(knowledgeAgent.Prompt?.Contains("query smoke check", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void GitHubCopilotRegistryRegistersDedicatedSquadGeneratorAgent()
+    {
+        var configs = GitHubCopilotModernizationAgentRegistry.CreateCustomAgentConfigs();
+        var generator = configs.Single(config => config.Name == "khepri-squad-generator");
+
+        CollectionAssert.Contains(generator.Tools?.ToArray(), "edit");
+        CollectionAssert.Contains(generator.Tools?.ToArray(), "execute");
+        CollectionAssert.Contains(generator.Tools?.ToArray(), "agent");
+        Assert.IsTrue(generator.Prompt?.Contains("SDK-first squad", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("AgentEvals", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("evaluators", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("test data", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("squad members", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("rubric", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("live-evals", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("multiple improvement loops", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(generator.Prompt?.Contains("steer too far", StringComparison.OrdinalIgnoreCase));
     }
 
     [TestMethod]
@@ -75,6 +150,38 @@ public sealed class ModernizationWorkflowTests
         Assert.AreEqual(ModernizationWorkflow.OrchestratorAgentName, session.Agent);
         Assert.IsTrue(session.IncludeSubAgentStreamingEvents);
         Assert.IsTrue(requiredAgents.All(agentName => session.CustomAgents?.Any(config => config.Name == agentName) == true));
+    }
+
+    [TestMethod]
+    public void SecurityModernizationAgentIsRegisteredAndUsedByPlanningStages()
+    {
+        const string securityAgentName = "security-modernization";
+        var contract = ModernizationWorkflow.CreateContract();
+        var planningStages = contract.Stages
+            .Where(stage => stage.Id is "incremental-modernization-plan" or "increment-area-squads" or "current-stage-plan-refinement")
+            .ToArray();
+
+        CollectionAssert.Contains(contract.RegisteredAgents.ToArray(), securityAgentName);
+        foreach (var stage in planningStages)
+        {
+            CollectionAssert.Contains(stage.RequiredAgents.ToArray(), securityAgentName, $"{stage.Id} should use security modernization advice.");
+            CollectionAssert.Contains(stage.Areas.Select(area => area.ToString()).ToArray(), "Security", $"{stage.Id} should treat security as a modernization area.");
+        }
+    }
+
+    [TestMethod]
+    public void GitHubCopilotRegistryPromptsSecurityModernizationAgentWithRiskAndRegressionGuidance()
+    {
+        var configs = GitHubCopilotModernizationAgentRegistry.CreateCustomAgentConfigs();
+        var securityAgent = configs.SingleOrDefault(config => config.Name == "security-modernization");
+
+        Assert.IsNotNull(securityAgent);
+        Assert.IsTrue(securityAgent!.Prompt?.Contains("threat modeling", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(securityAgent.Prompt?.Contains("identity and access", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(securityAgent.Prompt?.Contains("secrets", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(securityAgent.Prompt?.Contains("vulnerability", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(securityAgent.Prompt?.Contains("security regression", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(securityAgent.Prompt?.Contains("rollback", StringComparison.OrdinalIgnoreCase));
     }
 
     [TestMethod]
@@ -163,6 +270,23 @@ public sealed class ModernizationWorkflowTests
         var executionStep = atomicSteps.Single(step => step.StageId == "tdd-modernization-execution");
         Assert.IsTrue(executionStep.IndependentVerification.Any(check => check.Contains("verify red", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(executionStep.IndependentVerification.Any(check => check.Contains("verify green", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public void AtomicSquadGenerationStepRequiresSdkRubricLiveEvalOutputs()
+    {
+        var atomicSteps = ModernizationWorkflow.CreateAtomicStepContracts();
+        var squadStep = atomicSteps.Single(step => step.StageId == "increment-area-squads");
+
+        CollectionAssert.Contains(squadStep.RequiredAgents.ToArray(), "khepri-squad-generator");
+        Assert.IsTrue(squadStep.RequiredOutputs.Any(item => item.Contains("SDK-first squad config", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.RequiredOutputs.Any(item => item.Contains("AgentV scenarios", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.RequiredOutputs.Any(item => item.Contains("evaluators", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.RequiredOutputs.Any(item => item.Contains("test data", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.RequiredOutputs.Any(item => item.Contains("squad member rubric", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.IndependentVerification.Any(check => check.Contains("live-evals", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.IndependentVerification.Any(check => check.Contains("rubric adherence", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(squadStep.IndependentVerification.Any(check => check.Contains("multiple improvement loops", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]

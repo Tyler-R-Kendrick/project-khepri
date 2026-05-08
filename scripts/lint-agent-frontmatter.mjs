@@ -71,7 +71,7 @@ const expectedAgents = {
       {
         label: "Index Knowledge",
         agent: "khepri-knowledge",
-        prompt: "Index the current IR, business context, standards, and verification results for the active Project Khepri modernization phase. Return concise retrieval guidance and gaps.",
+        prompt: "Model the current IR, business context, standards, and verification results as a queryable knowledge base for the active Project Khepri modernization phase. Discover available knowledge-modeling capabilities without requiring named tools, then return concise retrieval guidance and gaps.",
         send: false
       },
       {
@@ -93,9 +93,21 @@ const expectedAgents = {
         send: false
       },
       {
+        label: "Inform Security Modernization",
+        agent: "security-modernization",
+        prompt: "Provide security modernization patterns, threat-modeling guidance, identity and access risks, vulnerability concerns, and security regression checks for the current Project Khepri modernization increment.",
+        send: false
+      },
+      {
         label: "Plan Modernization",
         agent: "khepri-planner",
         prompt: "Create an approval-ready Project Khepri modernization plan for the current phase, including tests, scaffolding, implementation steps, risks, and verification evidence.",
+        send: false
+      },
+      {
+        label: "Generate Increment Squad",
+        agent: "khepri-squad-generator",
+        prompt: "Generate the SDK-first Project Khepri increment squad with AgentV scenarios, evaluators, test data, squad members, rubric, live-eval loop, and red/green evidence before implementation proceeds.",
         send: false
       },
       {
@@ -180,9 +192,38 @@ const expectedAgents = {
         send: false
       },
       {
+        label: "Generate Increment Squad",
+        agent: "khepri-squad-generator",
+        prompt: "Generate the SDK-first squad, AgentV scenarios, evaluators, test data, squad member rubric, live-evals, and iteration evidence required before this Project Khepri increment proceeds to implementation.",
+        send: false
+      },
+      {
         label: "Coordinate Approval",
         agent: "khepri-orchestrator",
         prompt: "Coordinate user approval or phase sequencing for this Project Khepri plan before implementation begins.",
+        send: false
+      }
+    ]
+  },
+  "khepri-squad-generator": {
+    tools: ["read", "search", "edit", "execute", "agent", "github/*"],
+    handoffs: [
+      {
+        label: "Validate Generated Squad",
+        agent: "khepri-test",
+        prompt: "Run the focused AgentV scenarios, live-evals, squad build check, and broader Project Khepri validation for this generated squad.",
+        send: false
+      },
+      {
+        label: "Implement Squad Member Fix",
+        agent: "khepri-code",
+        prompt: "Use the failing squad-member rubric evidence to make the smallest prompt, profile, skill, or SDK squad change needed to restore rubric adherence.",
+        send: false
+      },
+      {
+        label: "Coordinate Squad Approval",
+        agent: "khepri-planner",
+        prompt: "Review the generated SDK-first squad, rubric evidence, residual risk, and iteration ledger before the modernization phase proceeds.",
         send: false
       }
     ]
@@ -239,7 +280,7 @@ const expectedAgents = {
       {
         label: "Index Test Results",
         agent: "khepri-knowledge",
-        prompt: "Index these Project Khepri test results, failure patterns, and verification evidence for future planning and assessment.",
+        prompt: "Refine the queryable knowledge base with these Project Khepri test results, failure patterns, and verification evidence for future planning and assessment.",
         send: false
       },
       {
@@ -326,6 +367,23 @@ const expectedAgents = {
         label: "Assess Infra Risk",
         agent: "khepri-modernization-assessor",
         prompt: "Assess the infrastructure modernization pattern recommendation for parity risk, acceptance evidence, and unresolved gaps before implementation.",
+        send: false
+      }
+    ]
+  },
+  "security-modernization": {
+    tools: ["read", "search", "agent", "github/*"],
+    handoffs: [
+      {
+        label: "Return Security Patterns",
+        agent: "khepri-planner",
+        prompt: "Use these security modernization pattern recommendations to refine the current Project Khepri modernization stage plan with explicit threat-modeling, identity, vulnerability, compliance, and regression tradeoffs.",
+        send: false
+      },
+      {
+        label: "Assess Security Risk",
+        agent: "khepri-modernization-assessor",
+        prompt: "Assess the security modernization pattern recommendation for parity risk, compensating controls, rollback gates, acceptance evidence, and unresolved gaps before implementation.",
         send: false
       }
     ]

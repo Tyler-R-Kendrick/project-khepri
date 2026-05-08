@@ -17,8 +17,15 @@
 2. Confirm no protected state or unrelated files were changed.
 3. Record decisions, risks, and follow-up work.
 
+## squad-generation-red-green-review
+**Participants:** @planner, @squad-generator, @tester, @evolution
+
+1. Confirm generated AgentV scenarios, evaluators, test data, and squad member rubric were written before implementation.
+2. Review RED evidence, GREEN evidence, focused live-evals, rubric adherence, and multiple improvement loops.
+3. Approve the SDK-first squad only when members no longer steer too far from their rubric and residual risk is explicit.
+
 ## squad-evolution-retro
-**Participants:** @planner, @evolution, @scribe
+**Participants:** @planner, @squad-generator, @evolution, @scribe
 
 1. Identify which agent roles helped or added drag.
 2. Promote repeated patterns into SDK-defined skills.

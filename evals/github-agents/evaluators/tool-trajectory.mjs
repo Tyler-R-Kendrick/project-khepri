@@ -104,7 +104,7 @@ function inferScenario(currentPayload) {
       ...base,
       scenario: "current-increment-squad-generation",
       trajectory_match_mode: "unordered",
-      expected_tools: ["agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:khepri-planner", "agent:khepri-test"]
+      expected_tools: ["agent:khepri-squad-generator", "agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:security-modernization", "agent:khepri-planner", "agent:khepri-test"]
     };
   }
 
@@ -149,7 +149,7 @@ function inferScenario(currentPayload) {
       ...base,
       scenario: "area-pattern-risk-review",
       trajectory_match_mode: "unordered",
-      expected_tools: ["agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:khepri-planner", "agent:khepri-modernization-assessor"]
+      expected_tools: ["agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:security-modernization", "agent:khepri-planner", "agent:khepri-modernization-assessor"]
     };
   }
 
@@ -158,7 +158,7 @@ function inferScenario(currentPayload) {
       ...base,
       scenario: "mixed-legacy-estate-increment",
       trajectory_match_mode: "ordered",
-      expected_tools: ["agent:khepri-spec", "agent:khepri-knowledge", "agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:khepri-planner", "agent:khepri-test"]
+      expected_tools: ["agent:khepri-spec", "agent:khepri-knowledge", "agent:app-modernization", "agent:data-modernization", "agent:infra-modernization", "agent:security-modernization", "agent:khepri-planner", "agent:khepri-test"]
     };
   }
 

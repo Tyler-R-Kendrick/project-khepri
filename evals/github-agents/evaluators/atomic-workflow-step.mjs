@@ -98,23 +98,23 @@ function stageExpectations(stageId) {
     case "incremental-modernization-plan":
       return {
         legacyKinds: true,
-        agents: ["khepri-planner", "app-modernization", "data-modernization", "infra-modernization"],
+        agents: ["khepri-planner", "app-modernization", "data-modernization", "infra-modernization", "security-modernization"],
         inputs: ["legacy specs", "target specs", "test plans", "area modernization advice"],
-        outputs: ["increment map", "app/data/infra risk sequencing", "approval checkpoints"],
+        outputs: ["increment map", "app/data/infra/security risk sequencing", "approval checkpoints"],
         verification: ["planner evidence trace", "area risks", "approval checkpoints"]
       };
     case "increment-area-squads":
       return {
         legacyKinds: true,
-        agents: ["app-modernization", "data-modernization", "infra-modernization", "khepri-code", "khepri-test"],
+        agents: ["khepri-squad-generator", "app-modernization", "data-modernization", "infra-modernization", "security-modernization", "khepri-code", "khepri-test"],
         inputs: ["increment scope", "legacy regression gates", "target test plans"],
-        outputs: ["app squad plan", "data squad plan", "infra squad plan", "tool_trajectory and llm_judge eval gates"],
-        verification: ["tool_trajectory", "llm_judge", "AgentEvals pass before implementation"]
+        outputs: ["SDK-first squad config", "app squad plan", "data squad plan", "infra squad plan", "security squad plan", "AgentV scenarios", "evaluators", "test data", "squad member rubric", "tool_trajectory and llm_judge eval gates"],
+        verification: ["tool_trajectory", "llm_judge", "live-evals", "rubric adherence", "multiple improvement loops", "AgentEvals pass before implementation"]
       };
     case "current-stage-plan-refinement":
       return {
         legacyKinds: true,
-        agents: ["khepri-planner", "app-modernization", "data-modernization", "infra-modernization"],
+        agents: ["khepri-planner", "app-modernization", "data-modernization", "infra-modernization", "security-modernization"],
         inputs: ["squad outputs", "increment constraints", "legacy parity gates"],
         outputs: ["stage-ready plan", "dependencies", "rollback plan", "regression gates"],
         verification: ["dependency check", "rollback plan review", "regression gates"]

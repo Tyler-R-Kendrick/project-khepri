@@ -34,7 +34,7 @@ Inspect the current implementation before editing prose:
 
 - Custom agents listed in docs match `.github/agents` and the .NET registry.
 - Workflow stages, stage order, and AgentEvals gates match `ModernizationWorkflow.CreateContract()`.
-- Diagrams show `khepri-evolution` as a companion plus the sequential modernization stages and app/data/infra squad gate.
+- Diagrams show `khepri-evolution` as a companion plus the sequential modernization stages and app/data/infra/security squad gate.
 - Skill, hook, instruction, eval, and steering docs reflect actual files in the repo.
 - Validation commands match `package.json`, `.agentv/targets.yaml`, and the .NET test project.
 - Conceptual IR/tool ideas are clearly marked as roadmap, not shipped implementation.

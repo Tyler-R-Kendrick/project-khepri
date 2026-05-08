@@ -117,7 +117,8 @@ function checkAgentGuidance() {
     "khepri-modernization-assessor",
     "app-modernization",
     "data-modernization",
-    "infra-modernization"
+    "infra-modernization",
+    "security-modernization"
   ];
   const terms = [
     "evals/legacy-samples",

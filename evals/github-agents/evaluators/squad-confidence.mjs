@@ -27,12 +27,13 @@ const combinedContract = [scenarioText, repoContractText, outputSurface].join("\
 const squadAgents = {
   app: "app-modernization",
   data: "data-modernization",
-  infra: "infra-modernization"
+  infra: "infra-modernization",
+  security: "security-modernization"
 };
 
 const assertions = [
   assertion("grader input is valid JSON", !payload.__parseError, payload.__parseError),
-  assertion("squad eval covers at least three modernization areas", requiredSquads.length >= 3, requiredSquads.join(", ")),
+  assertion("squad eval covers all four modernization areas", requiredSquads.length >= 4, requiredSquads.join(", ")),
   assertion("scenario asks for conservative risk or confidence gates", lowerIncludes(scenarioText, "risk") || lowerIncludes(scenarioText, "gate") || lowerIncludes(scenarioText, "prove"))
 ];
 
@@ -77,17 +78,17 @@ function inferScenario(currentPayload) {
   if (text.includes("generate the squads now")) {
     return {
       scenario: "current-increment-squad-generation",
-      required_squads: ["app", "data", "infra"],
-      required_evaluators: ["tool_trajectory", "llm_judge"],
-      required_evidence: ["TDD", "legacy regression", "rollback", "AgentEvals"]
+      required_squads: ["app", "data", "infra", "security"],
+      required_evaluators: ["tool_trajectory", "llm_judge", "live_eval"],
+      required_evidence: ["TDD", "legacy regression", "rollback", "AgentEvals", "squad member rubric", "live-evals"]
     };
   }
 
   if (text.includes("strangler-wrap") && text.includes("dual-write")) {
     return {
       scenario: "area-pattern-risk-review",
-      required_squads: ["app", "data", "infra"],
-      required_patterns: ["strangler", "dual-write", "containerization"],
+      required_squads: ["app", "data", "infra", "security"],
+      required_patterns: ["strangler", "dual-write", "containerization", "threat modeling"],
       required_evidence: ["when to use", "when to avoid", "regression", "rollback"]
     };
   }

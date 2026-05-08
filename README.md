@@ -10,7 +10,7 @@ The implemented system has seven primary surfaces:
 
 | Surface | Current files | Purpose |
 | --- | --- | --- |
-| GitHub custom agents | `.github/agents` | Bounded modernization roles, handoffs, tool access, and guardrails. |
+| GitHub custom agents | `.github/agents` | Bounded modernization roles, handoffs, tool access, queryable knowledge modeling, and guardrails. |
 | .NET workflow contract | `dotnet/src/Modernization/Workflow` | Source of truth for stage order, required agents, AgentEvals gates, legacy scenarios, sample packs, and Microsoft Agent Framework workflow builders. |
 | Agent Skills | `.github/skills` and `.copilot/skills` | Reusable procedures for Khepri workflow orchestration, learning corrections, Spec Kit, form building, and architecture-doc currency. |
 | Agent hooks | `.github/hooks` | Deterministic prompt hooks for learning corrections and invoking the architecture-docs skill when architecture changes are requested. |
@@ -47,19 +47,24 @@ sequenceDiagram
     participant spec as khepri-spec
     participant know as khepri-knowledge
     participant plan as khepri-planner
-    participant area as app/data/infra agents
+    participant area as app/data/infra/security agents
+    participant gen as khepri-squad-generator
     participant code as khepri-code
     participant test as khepri-test
     participant assess as khepri-modernization-assessor
 
     orch->>evo: start continuous improvement companion
     orch->>spec: legacy requirements, specs, tests
-    spec->>know: index legacy IR and evidence
+    spec->>know: model legacy IR and evidence as queryable knowledge
     orch->>spec: target requirements, specs, test plans
+    spec->>know: model desired-state evidence as queryable knowledge
     spec->>plan: target evidence and acceptance criteria
-    plan->>area: incremental app/data/infra modernization advice
+    plan->>area: incremental app/data/infra/security modernization advice
     area-->>plan: area risks and squad recommendations
-    plan->>test: require tool_trajectory and llm_judge gates
+    plan->>know: query and refine current-stage knowledge
+    plan->>gen: generate SDK-first squad with AgentV scenarios, evaluators, test data, rubric, and live-evals
+    gen->>test: require tool_trajectory, llm_judge, and live_eval gates
+    test-->>know: index test feedback and verification evidence
     test-->>plan: AgentEvals evidence
     plan->>code: current-stage plan and regression gates
     code->>test: red/green/refactor verification
@@ -86,13 +91,14 @@ The active Khepri custom agents are:
 - `khepri-orchestrator`: coordinates the workflow and delegates bounded phases.
 - `khepri-evolution`: runs as the continuous improvement companion and improves agents, skills, hooks, MCP recommendations, evals, and steering.
 - `khepri-spec`: extracts or generates legacy and target requirements, specs, tests, and test plans.
-- `khepri-knowledge`: indexes IR, business context, standards, and verification evidence.
+- `khepri-knowledge`: models IR, business context, standards, and verification evidence as a queryable knowledge base using whatever configured knowledge surface is available.
 - `khepri-planner`: creates incremental modernization plans and stage-ready plans.
+- `khepri-squad-generator`: generates SDK-first squads, AgentV scenarios, evaluators, test data, squad members, rubrics, and live-eval loops before implementation.
 - `khepri-scaffold`: executes approved scaffolding and minimal target seams.
 - `khepri-code`: implements approved behavior with TDD and legacy regression checks.
 - `khepri-test`: runs reproducible tests, builds, AgentV, and AgentEvals checks.
 - `khepri-modernization-assessor`: assesses parity, risk, acceptance evidence, and unresolved gaps.
-- `app-modernization`, `data-modernization`, `infra-modernization`: advise on area-specific modernization patterns, risks, and regression checks.
+- `app-modernization`, `data-modernization`, `infra-modernization`, `security-modernization`: advise on area-specific modernization patterns, risks, and regression checks.
 
 See `docs/agents/README.md` for the full agent contract.
 

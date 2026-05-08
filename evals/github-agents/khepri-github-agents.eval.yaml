@@ -16,7 +16,9 @@ tests:
         - app-modernization
         - data-modernization
         - infra-modernization
+        - security-modernization
         - khepri-planner
+        - khepri-squad-generator
         - khepri-scaffold
         - khepri-code
         - khepri-test
@@ -41,7 +43,9 @@ tests:
         - app-modernization
         - data-modernization
         - infra-modernization
+        - security-modernization
         - khepri-planner
+        - khepri-squad-generator
         - khepri-scaffold
         - khepri-code
         - khepri-test
@@ -293,6 +297,168 @@ tests:
         config:
           check: tdd-agents-agent-evals
 
+  - id: security-modernization-pattern-agent
+    criteria: The security-modernization custom agent advises Project Khepri increments with threat modeling, identity and access, secrets, vulnerability remediation, compliance, security regression checks, and rollback guidance before planner acceptance.
+    input: Inspect .github/agents/security-modernization.md for security modernization patterns, risk gates, sample-pack guidance, and planner/assessor handoffs.
+    expected_output:
+      agent_profile: security-modernization
+      responsibilities:
+        - provide security modernization patterns with when-to-use guidance
+        - identify threat-model deltas, identity and access risks, secrets rotation, vulnerability remediation, and compliance checks
+        - require security regression checks, compensating controls, and rollback gates
+        - hand security risk guidance to khepri-planner and khepri-modernization-assessor
+        - tie generated squads back to evals/legacy-samples evidence when applicable
+    assertions:
+      - name: security-modernization-pattern-agent
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: security-modernization-pattern-agent
+
+  - id: squad-generator-agent
+    criteria: A dedicated khepri-squad-generator custom agent owns SDK-first squad generation with AgentEvals/AgentV scenarios, evaluators, test data, squad members, rubrics, and red/green evidence.
+    input: Inspect .github/agents/khepri-squad-generator.md for squad-generation responsibilities and least-privilege tool access.
+    expected_output:
+      agent_profile: khepri-squad-generator
+      responsibilities:
+        - generate SDK-first squad.config.ts updates
+        - generate AgentV scenarios before squad member changes
+        - generate evaluators, test data, and squad members
+        - define a squad member rubric and live-eval loop
+        - improve squad members when they steer too far from the rubric
+        - report RED and GREEN evidence
+    assertions:
+      - name: squad-generator-agent
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: squad-generator-agent
+
+  - id: squad-generation-rubric-live-eval-loop
+    criteria: The Khepri workflow routes squad generation through a rubric-backed live-eval loop that runs during test/dev work and uses multiple improvement iterations before implementation proceeds.
+    input: Inspect Khepri custom agents for TDD using AgentEvals, generated scenarios/evaluators/test data, and rubric-driven squad member improvement.
+    expected_output:
+      workflow:
+        - write AgentV scenarios first
+        - generate or update evaluators and test data
+        - generate SDK-first squad members
+        - grade squad behavior against a clear rubric
+        - run live-evals in the test/dev loop
+        - improve members that steer too far from the rubric
+        - repeat focused reruns before broader validation
+    assertions:
+      - name: squad-generation-rubric-live-eval-loop
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: squad-generation-rubric-live-eval-loop
+
+  - id: sdk-squad-generator-config
+    criteria: The SDK-first Squad config includes a squad-generator member and routing/skill guidance for rubric-backed AgentEvals, evaluators, test data, and live-eval iteration.
+    input: Inspect squad.config.ts for SDK-first squad-generator configuration.
+    expected_output:
+      squad_config: squad.config.ts
+      required_terms:
+        - defineSquad
+        - defineAgent
+        - squad-generator
+        - SDK-first squad
+        - AgentEvals
+        - evaluators
+        - test data
+        - squad member rubric
+        - live-evals
+        - multiple improvement loops
+    assertions:
+      - name: sdk-squad-generator-config
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: sdk-squad-generator-config
+
+  - id: knowledge-agent-queryable-kb-tool-discovery
+    criteria: The knowledge agent models extracted knowledge as a queryable knowledge base by discovering available knowledge-modeling tools, MCPs, skills, wiki surfaces, databases, and graph stores without requiring users to name a specific capability.
+    input: Inspect .github/agents/khepri-knowledge.md for queryable knowledge-base capability discovery and validation behavior.
+    expected_output:
+      agent_profile: khepri-knowledge
+      responsibilities:
+        - discover available knowledge-modeling capabilities
+        - consider tools, skills, MCP servers, wiki surfaces, databases, and graph stores
+        - select the best available capability without requiring a user-named tool
+        - fall back to a repository-owned knowledge manifest when no queryable surface is available
+        - run a query smoke check and record the selected capability
+    assertions:
+      - name: knowledge-agent-queryable-kb-tool-discovery
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: knowledge-agent-queryable-kb-tool-discovery
+
+  - id: knowledge-agent-legacy-kb-modeling
+    criteria: Legacy knowledge extraction and generation hand off to the knowledge agent so source-backed requirements, IR, and regression seed tests become queryable knowledge-base entries.
+    input: Inspect Khepri custom agents for legacy knowledge extraction and generation coverage through the queryable knowledge agent.
+    expected_output:
+      stage_id: legacy-requirements-specs-tests
+      required_agent: khepri-knowledge
+      required_guidance:
+        - legacy knowledge extraction
+        - legacy knowledge generation
+        - source-backed requirements
+        - intermediary representations
+        - regression seed tests
+        - queryable knowledge base
+    assertions:
+      - name: knowledge-agent-legacy-kb-modeling
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: knowledge-agent-legacy-kb-modeling
+
+  - id: knowledge-agent-target-kb-modeling
+    criteria: Desired-state knowledge extraction and generation hand off to the knowledge agent so target requirements, target specs, acceptance criteria, and test plans become queryable knowledge-base entries.
+    input: Inspect Khepri custom agents for desired-state knowledge extraction and generation coverage through the queryable knowledge agent.
+    expected_output:
+      stage_id: target-requirements-specs-test-plans
+      required_agent: khepri-knowledge
+      required_guidance:
+        - desired-state knowledge extraction
+        - desired-state knowledge generation
+        - target requirements
+        - target specs
+        - test-PLANS
+        - acceptance criteria
+        - queryable knowledge base
+    assertions:
+      - name: knowledge-agent-target-kb-modeling
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: knowledge-agent-target-kb-modeling
+
+  - id: knowledge-agent-refinement-loop
+    criteria: Modernization dev/test loops use the knowledge agent to refine queryable knowledge and coordinate steering behavior updates from test feedback, verification evidence, and user corrections.
+    input: Inspect Khepri custom agents for intra-modernization knowledge refinement and steering behavior coverage.
+    expected_output:
+      responsibilities:
+        - refine the knowledge base during modernization dev/test loops
+        - index test feedback and verification evidence
+        - keep steering behavior updates traceable through STEERING.md and learn
+        - preserve red/green/refactor evidence in queryable context
+    assertions:
+      - name: knowledge-agent-refinement-loop
+        type: code-grader
+        command: [node, ./check-khepri-agents.mjs]
+        cwd: ./evals/github-agents
+        config:
+          check: knowledge-agent-refinement-loop
+
   - id: requested-tooling-installation
     criteria: The requested APM package, skills, AgentV-adjacent MCP/plugin config, and ADR agent artifacts are installed in project scope.
     input: Inspect installed project tooling and generated configuration.
@@ -423,7 +589,7 @@ tests:
           check: spec-agent-speckit-skill-contract
 
   - id: maf-ghcp-modernization-workflow
-    criteria: The repository enforces the modernization workflow in Microsoft Agent Framework code using the GitHub Copilot SDK, registered subagents, AgentEvals-backed TDD, and app/data/infra modernization pattern agents.
+    criteria: The repository enforces the modernization workflow in Microsoft Agent Framework code using the GitHub Copilot SDK, registered subagents, AgentEvals-backed TDD, and app/data/infra/security modernization pattern agents.
     input: Inspect the .NET modernization workflow, GHCP SDK registry, custom agent profiles, and package references.
     expected_output:
       workflow_project: dotnet/src/Modernization/Workflow/Khepri.Modernization.Workflow.csproj
@@ -451,6 +617,7 @@ tests:
         - app-modernization
         - data-modernization
         - infra-modernization
+        - security-modernization
       evidence:
         - AgentEvals
         - agentevals.io
@@ -548,24 +715,28 @@ tests:
             - agent:khepri-planner
 
   - id: multiturn-squad-generation-current-increment
-    criteria: The workflow generates specialized app, data, and infra squads for the current increment, asks each squad to refine the stage plan, and requires AgentEvals plus legacy regression checks before implementation.
+    criteria: The workflow uses the squad generator to create specialized app, data, infra, and security squads for the current increment, asks each squad to refine the stage plan, and requires AgentEvals, live-evals, rubrics, and legacy regression checks before implementation.
     input:
       - role: user
         content: "Increment 2 replaces claims submission while the legacy adjudication engine remains active."
       - role: assistant
-        content: "Phase: increment planning. I will use app-modernization, data-modernization, and infra-modernization before khepri-planner finalizes the stage plan."
+        content: "Phase: increment planning. I will use app-modernization, data-modernization, infra-modernization, and security-modernization before khepri-planner finalizes the stage plan."
       - role: user
-        content: "Generate the squads now. Each squad must explain its TDD loop, AgentEvals coverage, rollback path, and how it proves legacy behavior remains equivalent."
+        content: "Generate the squads now. Each squad must explain its TDD loop, AgentEvals coverage, live_eval rubric coverage, rollback path, and how it proves legacy behavior remains equivalent."
     expected_output:
       squads:
         - app
         - data
         - infra
+        - security
       evidence:
         - app modernization patterns
         - data migration gates
         - infra deployment gates
+        - security threat-model gates
         - AgentEvals tool calling and relevance
+        - squad member rubric
+        - live-evals
         - legacy regression red/green loop
     assertions:
       - name: custom-squad-confidence
@@ -578,14 +749,18 @@ tests:
             - app
             - data
             - infra
+            - security
           required_evaluators:
             - tool_trajectory
             - llm_judge
+            - live_eval
           required_evidence:
             - TDD
             - legacy regression
             - rollback
             - AgentEvals
+            - squad member rubric
+            - live-evals
       - name: custom-tool-trajectory
         type: code-grader
         command: [node, ./evaluators/tool-trajectory.mjs]
@@ -595,9 +770,11 @@ tests:
           evaluator_type: tool_trajectory
           trajectory_match_mode: unordered
           expected_tools:
+            - agent:khepri-squad-generator
             - agent:app-modernization
             - agent:data-modernization
             - agent:infra-modernization
+            - agent:security-modernization
             - agent:khepri-planner
             - agent:khepri-test
 
@@ -651,10 +828,10 @@ tests:
             - agent:khepri-modernization-assessor
 
   - id: multiturn-area-pattern-risk-review
-    criteria: The app, data, and infra modernization agents give when-to-use guidance, risks, regression checks, and rollback gates before planner acceptance.
+    criteria: The app, data, infra, and security modernization agents give when-to-use guidance, risks, regression checks, and rollback gates before planner acceptance.
     input:
       - role: user
-        content: "We are unsure whether to strangler-wrap the old web app, dual-write claims data, and containerize the worker jobs in the same increment."
+        content: "We are unsure whether to strangler-wrap the old web app, dual-write claims data, containerize the worker jobs, and change identity boundaries in the same increment."
       - role: assistant
         content: "Phase: area pattern review. I will ask the area modernization agents for when-to-use guidance before planner synthesis."
       - role: user
@@ -664,6 +841,7 @@ tests:
         - strangler
         - dual-write
         - containerization
+        - threat modeling
       evidence:
         - when to use
         - when to avoid
@@ -681,10 +859,12 @@ tests:
             - app
             - data
             - infra
+            - security
           required_patterns:
             - strangler
             - dual-write
             - containerization
+            - threat modeling
           required_evidence:
             - when to use
             - when to avoid
@@ -702,6 +882,7 @@ tests:
             - agent:app-modernization
             - agent:data-modernization
             - agent:infra-modernization
+            - agent:security-modernization
             - agent:khepri-planner
             - agent:khepri-modernization-assessor
 
@@ -941,7 +1122,7 @@ tests:
 
   - id: atomic-step-high-level-plan-contract
     criteria: The high-level modernization planning step is independently testable and only synthesizes increments from approved legacy and target specs.
-    input: "Validate atomic workflow step incremental-modernization-plan with required inputs, outputs, agents, independent verification, app/data/infra areas, risk sequencing, and approval checkpoints."
+    input: "Validate atomic workflow step incremental-modernization-plan with required inputs, outputs, agents, independent verification, app/data/infra/security areas, risk sequencing, and approval checkpoints."
     expected_output:
       stage_id: incremental-modernization-plan
       atomic_contract: true
@@ -949,6 +1130,7 @@ tests:
         - app
         - data
         - infra
+        - security
     assertions:
       - name: custom-atomic-workflow-step
         type: code-grader
@@ -958,18 +1140,20 @@ tests:
           stage_id: incremental-modernization-plan
 
   - id: atomic-step-squad-generation-contract
-    criteria: The squad generation step is independently testable and requires app, data, and infra squads plus AgentEvals before implementation.
-    input: "Validate atomic workflow step increment-area-squads with required inputs, outputs, agents, independent verification, app/data/infra squads, tool_trajectory, llm_judge, and no implementation until eval gates pass."
+    criteria: The squad generation step is independently testable and requires the squad generator, app, data, infra, and security squads plus AgentEvals, rubrics, and live-evals before implementation.
+    input: "Validate atomic workflow step increment-area-squads with required inputs, outputs, agents, independent verification, app/data/infra/security squads, SDK-first squad config, AgentV scenarios, evaluators, test data, squad member rubric, tool_trajectory, llm_judge, live-evals, and no implementation until eval gates pass."
     expected_output:
       stage_id: increment-area-squads
       atomic_contract: true
       evaluators:
         - tool_trajectory
         - llm_judge
+        - live_eval
       squads:
         - app
         - data
         - infra
+        - security
     assertions:
       - name: custom-atomic-workflow-step
         type: code-grader
@@ -1060,6 +1244,7 @@ tests:
         - app-modernization
         - data-modernization
         - infra-modernization
+        - security-modernization
         - khepri-planner
         - khepri-test
       evidence:
@@ -1082,6 +1267,7 @@ tests:
             - app-modernization
             - data-modernization
             - infra-modernization
+            - security-modernization
             - khepri-planner
             - khepri-test
           required_context_terms:
@@ -1107,6 +1293,7 @@ tests:
             - agent:app-modernization
             - agent:data-modernization
             - agent:infra-modernization
+            - agent:security-modernization
             - agent:khepri-planner
             - agent:khepri-test
       - name: custom-legacy-edge-case-regression
@@ -1147,7 +1334,7 @@ tests:
 
   - id: agent-legacy-sample-pack-usage
     criteria: The Khepri agents require sample-pack-driven extraction, planning, verification, and assessment so generated squads can prove behavior against concrete legacy fixtures.
-    input: "Inspect Khepri custom agents for legacy sample pack usage guidance across spec, planner, test, assessor, and app/data/infra modernization agents."
+    input: "Inspect Khepri custom agents for legacy sample pack usage guidance across spec, planner, test, assessor, and app/data/infra/security modernization agents."
     expected_output:
       required_agents:
         - khepri-spec
@@ -1157,6 +1344,7 @@ tests:
         - app-modernization
         - data-modernization
         - infra-modernization
+        - security-modernization
       required_guidance:
         - evals/legacy-samples
         - sample pack

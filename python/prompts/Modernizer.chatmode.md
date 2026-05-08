@@ -31,7 +31,7 @@ Do not invent a separate phase model from this prompt. If this prompt conflicts 
 - Keep each phase bounded to its responsible Khepri agent.
 - Preserve source-backed legacy behavior before target implementation.
 - Use TDD for behavior changes and AgentV/AgentEvals for agent-surface changes.
-- Keep app, data, and infra modernization advice explicit during increment planning.
+- Keep app, data, infra, and security modernization advice explicit during increment planning.
 - Capture user corrections through the `learn` skill and `STEERING.md`.
 - Invoke `$keep-architecture-docs-current` whenever workflow, agent, skill, hook, eval, CI, package-script, or repository-structure changes affect current architecture docs or Mermaid diagrams.
 

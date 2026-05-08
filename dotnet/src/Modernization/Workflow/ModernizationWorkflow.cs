@@ -12,7 +12,8 @@ public enum ModernizationArea
 {
     App,
     Data,
-    Infra
+    Infra,
+    Security
 }
 
 public enum LegacySystemKind
@@ -85,6 +86,8 @@ public static class ModernizationWorkflow
     public const string AppModernizationAgentName = "app-modernization";
     public const string DataModernizationAgentName = "data-modernization";
     public const string InfraModernizationAgentName = "infra-modernization";
+    public const string SecurityModernizationAgentName = "security-modernization";
+    public const string SquadGeneratorAgentName = "khepri-squad-generator";
 
     private static readonly string[] RegisteredAgentNames =
     [
@@ -99,7 +102,9 @@ public static class ModernizationWorkflow
         EvolutionAgentName,
         AppModernizationAgentName,
         DataModernizationAgentName,
-        InfraModernizationAgentName
+        InfraModernizationAgentName,
+        SecurityModernizationAgentName,
+        SquadGeneratorAgentName
     ];
 
     private static readonly string[] SequentialAgentOrder =
@@ -108,7 +113,12 @@ public static class ModernizationWorkflow
         EvolutionAgentName,
         SpecAgentName,
         KnowledgeAgentName,
+        AppModernizationAgentName,
+        DataModernizationAgentName,
+        InfraModernizationAgentName,
+        SecurityModernizationAgentName,
         PlannerAgentName,
+        SquadGeneratorAgentName,
         ScaffoldAgentName,
         CodeAgentName,
         TestAgentName,
@@ -119,7 +129,8 @@ public static class ModernizationWorkflow
     [
         AppModernizationAgentName,
         DataModernizationAgentName,
-        InfraModernizationAgentName
+        InfraModernizationAgentName,
+        SecurityModernizationAgentName
     ];
 
     public static ModernizationWorkflowContract CreateContract()
@@ -130,28 +141,28 @@ public static class ModernizationWorkflow
             [
                 new ModernizationWorkflowStage(
                     "legacy-requirements-specs-tests",
-                    "Generate or extract requirements, specifications, and executable tests from existing legacy systems before target work begins.",
+                    "Generate or extract requirements, specifications, executable tests, and queryable knowledge-base entries from existing legacy systems before target work begins.",
                     [SpecAgentName, KnowledgeAgentName, TestAgentName],
                     [],
-                    ["source evidence", "legacy behavior inventory", "legacy regression seed tests"]),
+                    ["source evidence", "legacy behavior inventory", "legacy regression seed tests", "legacy queryable knowledge base"]),
                 new ModernizationWorkflowStage(
                     "target-requirements-specs-test-plans",
-                    "Generate or extract requirements, specifications, and test plans from target desired state systems and standards.",
+                    "Generate or extract requirements, specifications, test plans, and queryable knowledge-base entries from target desired-state systems and standards.",
                     [SpecAgentName, KnowledgeAgentName, PlannerAgentName],
                     [],
-                    ["target desired state evidence", "acceptance criteria", "test-PLANS"]),
+                    ["target desired state evidence", "acceptance criteria", "test-PLANS", "target queryable knowledge base"]),
                 new ModernizationWorkflowStage(
                     "incremental-modernization-plan",
                     "Generate the high-level incremental modernization plan from the legacy and target specs.",
-                    [PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName],
-                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra],
-                    ["increment map", "area risks", "approval checkpoints"]),
+                    [PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, SecurityModernizationAgentName],
+                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
+                    ["increment map", "area risks", "security risks", "approval checkpoints"]),
                 new ModernizationWorkflowStage(
                     "increment-area-squads",
-                    "Generate specialized app, data, and infra squads for each increment and require AgentEvals from agentevals.io before implementation.",
-                    [AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, CodeAgentName, TestAgentName],
-                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra],
-                    ["AgentEvals", "agentevals.io", "tool-calling evaluator", "relevance evaluator"])
+                    "Use the dedicated squad generator to generate specialized app, data, infra, and security squads for each increment, using a TDD loop with AgentEvals from agentevals.io before implementation.",
+                    [SquadGeneratorAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, SecurityModernizationAgentName, CodeAgentName, TestAgentName],
+                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
+                    ["AgentEvals", "agentevals.io", "tool-calling evaluator", "relevance evaluator", "SDK-first squad", "generated AgentV scenarios", "evaluators", "test data", "squad member rubric", "multiple improvement loops", "live-evals", "improve squad members that steer too far from their rubric"])
                 {
                     RequiredAgentEvals =
                     [
@@ -162,21 +173,29 @@ public static class ModernizationWorkflow
                         new AgentEvalRequirement(
                             "relevance",
                             "llm_judge",
-                            "Proves generated squad recommendations stay relevant to the active increment, legacy behavior, and target desired state.")
+                            "Proves generated squad recommendations stay relevant to the active increment, legacy behavior, and target desired state."),
+                        new AgentEvalRequirement(
+                            "squad-member-rubric",
+                            "llm_judge",
+                            "Grades whether each generated squad member has a clear goal, bounded behavior, and rubric adherence criteria."),
+                        new AgentEvalRequirement(
+                            "rubric-live-eval",
+                            "live_eval",
+                            "Runs the squad member rubric as live-evals in the test/dev loop and flags members that steer too far from their rubric.")
                     ]
                 },
                 new ModernizationWorkflowStage(
                     "current-stage-plan-refinement",
-                    "Use the generated squads to refine a detailed modernization plan for the current stage.",
-                    [PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName],
-                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra],
-                    ["stage-ready plan", "dependencies", "rollback plan", "regression gates"]),
+                    "Use the generated squads and queryable knowledge base to refine a detailed modernization plan for the current stage.",
+                    [KnowledgeAgentName, PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, SecurityModernizationAgentName],
+                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
+                    ["knowledge refinement", "stage-ready plan", "dependencies", "rollback plan", "regression gates"]),
                 new ModernizationWorkflowStage(
                     "tdd-modernization-execution",
-                    "Act on the current stage plan with TDD, keeping legacy regression checks central to every red/green/refactor loop.",
-                    [CodeAgentName, TestAgentName, AssessorAgentName],
-                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra],
-                    ["legacy regression checks", "red/green/refactor evidence", "AgentEvals rerun", "acceptance evidence"])
+                    "Act on the current stage plan with TDD, keeping legacy regression checks and queryable knowledge refinement central to every red/green/refactor loop.",
+                    [KnowledgeAgentName, CodeAgentName, TestAgentName, AssessorAgentName],
+                    [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
+                    ["legacy regression checks", "red/green/refactor evidence", "knowledge refinement", "AgentEvals rerun", "acceptance evidence"])
             ]);
     }
 
@@ -201,17 +220,17 @@ public static class ModernizationWorkflow
                 [LegacySystemKind.Cobol, LegacySystemKind.DotNetFramework, LegacySystemKind.JavaMonolith]),
             CreateAtomicStep(
                 stages["incremental-modernization-plan"],
-                "Smallest unit: one independently approvable increment across app, data, and infra areas with risk sequencing and rollback checkpoints.",
+                "Smallest unit: one independently approvable increment across app, data, infra, and security areas with risk sequencing and rollback checkpoints.",
                 ["legacy specs", "target specs", "test plans", "area modernization advice"],
-                ["increment map", "app/data/infra risk sequencing", "approval checkpoints"],
-                ["planner evidence trace", "area risks", "approval checkpoints"],
+                ["increment map", "app/data/infra/security risk sequencing", "approval checkpoints"],
+                ["planner evidence trace", "area risks", "security risks", "approval checkpoints"],
                 [LegacySystemKind.Cobol, LegacySystemKind.DotNetFramework, LegacySystemKind.JavaMonolith]),
             CreateAtomicStep(
                 stages["increment-area-squads"],
-                "Smallest unit: one generated app/data/infra squad set for a single increment, blocked on AgentEvals before implementation.",
+                "Smallest unit: one SDK-first squad config for a generated app/data/infra/security squad set, blocked on AgentEvals before implementation.",
                 ["increment scope", "legacy regression gates", "target test plans"],
-                ["app squad plan", "data squad plan", "infra squad plan", "tool_trajectory and llm_judge eval gates"],
-                ["tool_trajectory", "llm_judge", "AgentEvals pass before implementation"],
+                ["SDK-first squad config", "app squad plan", "data squad plan", "infra squad plan", "security squad plan", "AgentV scenarios", "evaluators", "test data", "squad member rubric", "tool_trajectory and llm_judge eval gates"],
+                ["tool_trajectory", "llm_judge", "live-evals", "rubric adherence", "multiple improvement loops", "AgentEvals pass before implementation"],
                 [LegacySystemKind.Cobol, LegacySystemKind.DotNetFramework, LegacySystemKind.JavaMonolith]),
             CreateAtomicStep(
                 stages["current-stage-plan-refinement"],

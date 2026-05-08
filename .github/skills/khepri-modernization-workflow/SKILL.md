@@ -1,6 +1,6 @@
 ---
 name: khepri-modernization-workflow
-description: Use when coordinating, inspecting, running, or verifying the Project Khepri modernization workflow, Microsoft Agent Framework workflow, GHCP SDK custom-agent registry, increment squad workflow, AgentEvals gates, or app/data/infra modernization sequence.
+description: Use when coordinating, inspecting, running, or verifying the Project Khepri modernization workflow, Microsoft Agent Framework workflow, GHCP SDK custom-agent registry, increment squad workflow, AgentEvals gates, or app/data/infra/security modernization sequence.
 ---
 
 # Khepri Modernization Workflow
@@ -21,7 +21,7 @@ Use this skill as the entrypoint for the Project Khepri modernization workflow. 
 2. Use `ModernizationWorkflow.CreateContract()` for stage order, required evidence, required agents, and AgentEvals gates.
 3. Use `GitHubCopilotModernizationAgentRegistry.CreateSessionConfig(...)` when configuring a GHCP SDK session.
 4. Use `ModernizationWorkflow.BuildMicrosoftAgentFrameworkWorkflow(...)` for the full sequential workflow.
-5. Use `ModernizationWorkflow.BuildIncrementSquadWorkflow(...)` for per-increment app/data/infra squad generation.
+5. Use `ModernizationWorkflow.BuildIncrementSquadWorkflow(...)` for per-increment app/data/infra/security squad generation.
 6. Do not copy the workflow stages into new prompt-only logic. Change the .NET source of truth when the workflow contract changes.
 
 ## Validation

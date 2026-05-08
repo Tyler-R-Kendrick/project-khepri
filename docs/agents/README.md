@@ -9,8 +9,9 @@ Project Khepri defines repository-level GitHub Copilot custom agents in `.github
 | `khepri-orchestrator` | Coordinates the workflow and delegates bounded phases. | No |
 | `khepri-evolution` | Improves agents, skills, hooks, MCP recommendations, evals, docs, and steering while phase work proceeds. | Yes |
 | `khepri-spec` | Extracts or generates requirements, specs, tests, and test plans from legacy and target systems. | Yes |
-| `khepri-knowledge` | Indexes IR, business context, standards, and verification evidence. | Yes |
+| `khepri-knowledge` | Models IR, business context, standards, and verification evidence as a queryable knowledge base. | Yes |
 | `khepri-planner` | Creates incremental and stage-ready modernization plans. | Yes |
+| `khepri-squad-generator` | Generates SDK-first squads, AgentV scenarios, evaluators, test data, rubrics, and live-eval loops. | Yes |
 | `khepri-scaffold` | Executes approved scaffolding and minimal type-signature plans. | Yes |
 | `khepri-code` | Implements approved behavior with tests first. | Yes |
 | `khepri-test` | Runs reproducible verification commands. | No |
@@ -18,6 +19,7 @@ Project Khepri defines repository-level GitHub Copilot custom agents in `.github
 | `app-modernization` | Advises on application modernization patterns. | No |
 | `data-modernization` | Advises on data modernization patterns. | No |
 | `infra-modernization` | Advises on infrastructure modernization patterns. | No |
+| `security-modernization` | Advises on security modernization patterns and regression gates. | No |
 
 Frontmatter correctness and least-privilege tool access are checked by `npm run lint:agents` and `npm run eval:agents`.
 
@@ -29,6 +31,7 @@ The .NET registry currently:
 - sets `khepri-orchestrator` as the default session agent;
 - enables subagent streaming;
 - loads `.github/skills` and `.copilot/skills`;
+- prompts `khepri-knowledge` to discover available knowledge-modeling capabilities and run a query smoke check before handing off retrieval guidance;
 - preloads `khepri-modernization-workflow` and `keep-architecture-docs-current` for the orchestrator;
 - preloads `keep-architecture-docs-current` for `khepri-evolution`;
 - builds Microsoft Agent Framework `AIAgent` wrappers around the GitHub Copilot SDK agents.
@@ -41,7 +44,7 @@ flowchart LR
     registry --> session["GitHub Copilot SDK SessionConfig"]
     session --> maf["Microsoft Agent Framework AIAgent map"]
     maf --> seq["sequential workflow"]
-    maf --> squads["concurrent app/data/infra squad workflow"]
+    maf --> squads["concurrent app/data/infra/security squad workflow"]
 ```
 
 ## Workflow Handoffs
@@ -49,25 +52,33 @@ flowchart LR
 The orchestrator starts `khepri-evolution` first, then delegates the active phase. The implemented high-level order is:
 
 1. Legacy requirements, specs, and regression seed tests.
-2. Target requirements, specs, and test plans.
-3. Incremental modernization planning.
-4. App/data/infra squad generation with AgentEvals gates.
-5. Current-stage plan refinement.
-6. TDD modernization execution and assessment.
+2. Legacy queryable knowledge-base modeling.
+3. Target requirements, specs, and test plans.
+4. Target desired-state queryable knowledge-base modeling.
+5. Incremental modernization planning.
+6. App/data/infra/security pattern guidance.
+7. SDK-first squad generation with AgentEvals, evaluators, test data, rubrics, and live-evals.
+8. Current-stage plan refinement with knowledge queries.
+9. TDD modernization execution, knowledge refinement, and assessment.
 
 ```mermaid
 sequenceDiagram
     participant orch as khepri-orchestrator
     participant evo as khepri-evolution
     participant phase as Active phase agent
+    participant know as khepri-knowledge
+    participant gen as khepri-squad-generator
     participant test as khepri-test
     participant assess as khepri-modernization-assessor
 
     orch->>evo: Start Continuous Evolution
     orch->>phase: Hand off current workflow stage
     phase-->>orch: Return artifacts, evidence, and gaps
-    orch->>test: Run focused and broad verification
-    test-->>orch: Return command, exit code, and evidence
+    phase->>know: Query or refine knowledge base
+    orch->>gen: Generate SDK-first squad and rubric-backed live-evals
+    gen->>test: Run focused AgentV, live-evals, and broader validation
+    test-->>phase: Return command, exit code, and evidence
+    test->>know: Index verification evidence
     orch->>assess: Assess parity, risk, and acceptance readiness
     evo-->>orch: Return approved durable improvements
 ```

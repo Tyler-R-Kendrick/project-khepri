@@ -17,6 +17,7 @@
 |------|------|---------|--------|
 | Planner | Modernization Planner | `.squad/agents/planner/charter.md` | ✅ Active |
 | Evolution | Squad Evolution Architect | `.squad/agents/evolution/charter.md` | ✅ Active |
+| Squad-generator | AgentEval Squad Generator | `.squad/agents/squad-generator/charter.md` | ✅ Active |
 | Archaeologist | Legacy Archaeologist | `.squad/agents/archaeologist/charter.md` | ✅ Active |
 | Refactor | Refactoring Engineer | `.squad/agents/refactor/charter.md` | ✅ Active |
 | Tester | Regression Test Lead | `.squad/agents/tester/charter.md` | ✅ Active |

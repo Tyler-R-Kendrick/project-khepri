@@ -38,7 +38,8 @@ Modernization work is split into narrow roles:
 - code/TDD;
 - verification;
 - assessment;
-- app/data/infra modernization advice.
+- app/data/infra/security modernization advice;
+- SDK-first squad generation.
 
 Least-privilege tools are intentional: the orchestrator coordinates without direct edit or execute access, while test and assessor agents avoid edit access.
 
@@ -48,34 +49,46 @@ Least-privilege tools are intentional: the orchestrator coordinates without dire
 
 Evolution work must stay reviewable and should not block the active phase unless safety, correctness, steering, or approval issues require escalation.
 
-### 5. AgentV And Code-Graders Protect Agent Contracts
+### 5. Knowledge Is Modeled As Queryable Context
+
+`khepri-knowledge` owns the workflow's queryable knowledge-base contract. It turns legacy evidence, desired-state evidence, business context, standards, test feedback, and verification results into retrievable entries rather than one-off summaries.
+
+The agent discovers available knowledge-modeling capabilities in the active workflow, including configured tools, skills, MCP servers, wiki surfaces, databases, graph stores, and repository-owned manifests. It records the selected capability and query smoke check so later agents know how to retrieve facts and where the fallback boundary is.
+
+### 6. AgentV And Code-Graders Protect Agent Contracts
 
 The repository uses `evals/github-agents/khepri-github-agents.eval.yaml` and `evals/github-agents/check-khepri-agents.mjs` to validate agent profile schema, handoffs, least-privilege tools, steering, skills, hooks, workflow code, and documentation enforcement.
 
 Agent prompt, profile, skill, hook, and eval changes should be backed by focused AgentV evidence before broader validation.
 
-### 6. Legacy Sample Packs Provide Concrete Regression Evidence
+### 7. Squad Generation Is SDK-First And Eval-Driven
+
+`khepri-squad-generator` owns generated modernization squads. It changes `squad.config.ts` as the SDK-first source of truth, writes AgentV scenarios before squad member changes, creates evaluators and test data, defines squad member rubrics, and runs live-evals in the test/dev loop.
+
+Generated squad members are not accepted until multiple improvement loops show rubric adherence, focused evals are green, broader validation has no new regressions, and residual risk is explicit.
+
+### 8. Legacy Sample Packs Provide Concrete Regression Evidence
 
 `evals/legacy-samples` contains small source-shaped sample packs for COBOL claims, legacy .NET Framework claims portal, and Java payment monolith scenarios. They are deterministic fixtures for planning and evals. They are not full legacy-system emulators.
 
 Generated modernization plans should cite these packs only when they map to the active legacy system.
 
-### 7. User Corrections Become Steering
+### 9. User Corrections Become Steering
 
 The `learn` skill and `.github/hooks/learn.json` hook capture reusable user corrections as concise generalized entries in `STEERING.md`. All Khepri custom agents read `STEERING.md` before phase work.
 
 Do not store secrets, credentials, private data, or long transcripts in steering.
 
-### 8. Architecture Docs Must Change With Architecture
+### 10. Architecture Docs Must Change With Architecture
 
 The `keep-architecture-docs-current` Agent Skill, `.github/hooks/architecture-docs.json`, `.github/hooks/scripts/architecture-docs.mjs`, and `.github/instructions/architecture-docs.instructions.md` enforce the rule that architecture-affecting changes update docs and Mermaid diagrams in the same change.
 
 Architecture-affecting changes include workflow contracts, agent profiles, Agent Skills, hooks, MCP configuration, AgentV evals, CI, package scripts, repository structure, and durable process guidance.
 
-### 9. Squad And Spec Kit Are Integration Surfaces
+### 11. Squad And Spec Kit Are Integration Surfaces
 
 `squad.config.ts`, `.squad`, `.specify`, and `.agents` provide local squad and Spec Kit assets that support planning, agent specialization, and workflow automation. They are integration surfaces around the Khepri control plane, not replacements for the .NET workflow contract.
 
-### 10. Roadmap Ideas Stay Labeled As Roadmap
+### 12. Roadmap Ideas Stay Labeled As Roadmap
 
 Conceptual intermediary-representation tools such as Code2/NL, Structurizr extraction, TOSCA/CUE models, BPMN, SBOM generation, production KnowledgeGraphRag, Planner4, policy-as-code, and runtime emulation remain roadmap items until implemented with tests and docs.

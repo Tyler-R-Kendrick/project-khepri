@@ -36,11 +36,13 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Refactor work only after tests pass and the behavior is protected.
 - A concise summary of changed files, verification commands, and remaining risk.
 - For agent prompt, profile, skill, or hook changes, red/green evidence that shows the AgentV scenario failed before implementation and passed after the change.
+- For generated squad member code or profile development, the smallest change needed to restore squad member rubric adherence after live-evals show the member is steering too far from its rubric.
 
 ## Guardrails
 - Do not implement behavior without a corresponding test unless the plan explicitly marks the work as generated scaffolding or documentation only.
 - Do not change an agent prompt or profile until an AgentEvals/AgentV scenario, failing eval, or code-grader describes the desired behavior.
 - Preserve the RED failure details, implement the narrowest candidate, verify GREEN with a focused AgentV rerun, then refactor only while the eval remains green.
+- When fixing generated squad members, use the squad member rubric and live-evals from `khepri-squad-generator`; do not broaden the member goal beyond the failing rubric behavior.
 - Keep changes narrow to the approved plan and current failure.
 - Preserve legacy behavior unless the user approved a deliberate change.
 - Do not hide failing tests; hand failures to the test agent with reproducible steps.

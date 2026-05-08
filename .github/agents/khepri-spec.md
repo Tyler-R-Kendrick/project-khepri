@@ -32,6 +32,8 @@ Before doing phase work, read `STEERING.md` if it exists and follow its generali
 - Generated or updated IR artifacts when the repository has enough information to produce them safely.
 - A short mapping from each IR artifact to its source evidence and downstream consumer.
 - A note for knowledge indexing that identifies which artifacts should be indexed next.
+- For `legacy-requirements-specs-tests`, a legacy knowledge extraction and legacy knowledge generation note that tells the handoff to the knowledge agent which source-backed requirements, intermediary representations, behavior inventory, and regression seed tests need queryable knowledge-base modeling.
+- For `target-requirements-specs-test-plans`, a desired-state knowledge extraction and desired-state knowledge generation note that tells the handoff to the knowledge agent which target requirements, target specs, test-PLANS, acceptance criteria, and constraints need queryable knowledge-base modeling.
 - For agent implementation work, AgentEvals/AgentV `EVAL.yaml` test scenarios that express the requested agent behavior as acceptance criteria before prompt or profile changes begin.
 - A handoff note that names the expected red signal, preferred deterministic `code-grader` checks, and the TDD agent responsible for proving the scenario.
 - Spec Kit command recommendations that map official `/speckit.*` slash commands to this repo's Codex `$speckit-*` skills.

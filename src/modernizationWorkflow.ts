@@ -145,6 +145,22 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
         domain?: ModernizationDomain,
       ) => addEvent({ type: 'tool.used', state, tool, args, domain });
 
+      const evaluateAgenticBehavior = (
+        state: WorkflowState,
+        behavior: string,
+        domain?: ModernizationDomain,
+      ) =>
+        useTool(
+          state,
+          'agent_evals.evaluate_agentic_behavior',
+          {
+            behavior,
+            coverage: '100%',
+            evaluators: ['tool_trajectory', 'llm_judge', 'rubric'],
+          },
+          domain,
+        );
+
       enter('legacy-discovery');
       useTool('legacy-discovery', 'microsoft_agent_framework.start_stateful_workflow', {
         workflow: 'github-copilot-modernization',
@@ -163,6 +179,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
       addEvent({ type: 'requirements.extracted', state: 'legacy-discovery' });
       addEvent({ type: 'spec.created', state: 'legacy-discovery' });
       addEvent({ type: 'test_plan.created', state: 'legacy-discovery' });
+      evaluateAgenticBehavior(
+        'legacy-discovery',
+        'legacy requirements, specs, and executable regression tests were extracted from registered legacy systems',
+      );
 
       enter('target-discovery');
       useTool('target-discovery', 'target_system.extract_requirements_specs_test_plans', {
@@ -172,6 +192,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
       addEvent({ type: 'requirements.extracted', state: 'target-discovery' });
       addEvent({ type: 'spec.created', state: 'target-discovery' });
       addEvent({ type: 'test_plan.created', state: 'target-discovery' });
+      evaluateAgenticBehavior(
+        'target-discovery',
+        'target desired-state requirements, specs, and test plans were extracted before planning',
+      );
 
       if (request.ambiguities?.length) {
         for (const ambiguity of request.ambiguities) {
@@ -263,6 +287,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
         state: 'modernization-planning',
         args: { planId: plan.id, incremental: true },
       });
+      evaluateAgenticBehavior(
+        'modernization-planning',
+        'registered modernization agents informed a high-level incremental plan from approved specs',
+      );
 
       enter('plan-persistence');
       const tracker = request.repository.trackers[0]?.kind ?? 'registered-project-tracker';
@@ -276,6 +304,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
         state: 'plan-persistence',
         args: { tracker, planId: plan.id },
       });
+      evaluateAgenticBehavior(
+        'plan-persistence',
+        'incremental modernization plan was persisted to the registered project tracker',
+      );
 
       enter('specialist-squad-tdd');
       for (const domain of domains) {
@@ -305,6 +337,8 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
           });
           useTool('specialist-squad-tdd', 'agent_evals.evaluate_squad', {
             evaluator: 'trajectory_match',
+            coverage: '100%',
+            evaluators: ['tool_trajectory', 'llm_judge', 'rubric'],
             squadId: phase.squadId,
             expected: ['handoff', 'skill.use', 'spec-driven-tests'],
           }, domain);
@@ -316,6 +350,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
           });
         }
       }
+      evaluateAgenticBehavior(
+        'specialist-squad-tdd',
+        'phase-dedicated app, infra, and data squads were generated through AgentEvals-backed TDD',
+      );
 
       enter('incremental-development');
       for (const domain of domains) {
@@ -348,6 +386,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
           });
         }
       }
+      evaluateAgenticBehavior(
+        'incremental-development',
+        'generated squads executed the current modernization stage through red-green legacy regression checks',
+      );
 
       enter('phase-retro');
       addEvent({
@@ -358,6 +400,10 @@ export function createModernizationWorkflow(options: ModernizationWorkflowOption
           promotesPatternsToSkills: true,
         },
       });
+      evaluateAgenticBehavior(
+        'phase-retro',
+        'phase retrospective captured reusable modernization patterns and follow-up eval gaps',
+      );
       enter('complete');
 
       return {

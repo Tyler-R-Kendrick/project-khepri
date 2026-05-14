@@ -12,6 +12,7 @@ import {
   toAgentEvalMessages,
   toGraphTrajectory,
   type ModernizationRequest,
+  type WorkflowState,
 } from '../src/modernizationWorkflow';
 
 const repoRoot = path.resolve(__dirname, '..');
@@ -169,6 +170,39 @@ describe('GitHub Copilot modernization workflow', () => {
           expect(phase.dependsOn).toContain(phases[index - 1].id);
         }
       });
+    }
+  });
+
+  test('covers every agentic workflow state with AgentEvals before completion', async () => {
+    const workflow = createModernizationWorkflow({
+      now: () => '2026-05-07T15:00:00.000Z',
+      nextId: (prefix, index) => `${prefix}-${index + 1}`,
+    });
+
+    const result = await workflow.run(baseRequest());
+    const requiredStates: WorkflowState[] = [
+      'legacy-discovery',
+      'target-discovery',
+      'modernization-planning',
+      'plan-persistence',
+      'specialist-squad-tdd',
+      'incremental-development',
+      'phase-retro',
+    ];
+    const agentEvalEvents = result.events.filter(
+      (event) => event.type === 'tool.used' && event.tool?.startsWith('agent_evals.'),
+    );
+    const coveredStates = new Set(agentEvalEvents.map((event) => event.state));
+
+    for (const state of requiredStates) {
+      expect(coveredStates.has(state), `${state} must have AgentEvals coverage`).toBe(true);
+    }
+
+    for (const event of agentEvalEvents) {
+      expect(event.args).toMatchObject({ coverage: '100%' });
+      expect(event.args?.evaluators).toEqual(
+        expect.arrayContaining(['tool_trajectory', 'llm_judge', 'rubric']),
+      );
     }
   });
 

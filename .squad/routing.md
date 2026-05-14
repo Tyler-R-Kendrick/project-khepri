@@ -7,7 +7,10 @@
 
 ## Rules
 
-- `modernization|migration|upgrade|roadmap|decomposition|phase plan|technical debt` → @planner, @evolution — Planner scopes the effort while evolution generates the specialist squad design.
+- `modernization|migration|upgrade|roadmap|decomposition|phase plan|technical debt` → @planner, @evolution, @app-modernizer, @infra-modernizer, @data-modernizer — Planner scopes the effort while evolution and domain modernizers generate specialist squad designs.
+- `app-modernizer|frontend|backend|application|ui|api seam|framework migration|user-facing` → @app-modernizer, @tester — Application modernization routes to app-modernizer with test support.
+- `infra-modernizer|infrastructure|platform|ci|cd|runtime|deployment|observability|rollback` → @infra-modernizer, @tester — Infrastructure modernization routes to infra-modernizer with verification support.
+- `data-modernizer|database|schema|migration|backfill|reconciliation|retention|data quality` → @data-modernizer, @tester, @security — Data modernization routes to data-modernizer with test and security support.
 - `squad generation|squad-generator|live-evals|rubric adherence|agent evals|agentv|evaluator|test data` → @squad-generator, @tester, @planner — Dedicated SDK-first squad generator owns AgentEvals, evaluators, test data, live-evals, and rubric-backed improvement loops.
 - `squad.config|agent|routing|ceremony|skill|team design|model selection` → @squad-generator, @evolution, @planner — SDK-first squad structure belongs to the squad generator with evolution and planner review.
 - `legacy|compatibility|behavior|dependency map|codebase review|discovery` → @archaeologist, @tester — Discover current behavior and test seams before changes.

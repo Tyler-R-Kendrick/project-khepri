@@ -8,6 +8,9 @@
     "lint:agents": "node scripts/lint-agent-frontmatter.mjs",
     "postinstall": "node scripts/patch-squad-postinstall.mjs",
     "preeval:agents": "npm run lint:agents",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "agent-evals:dry-run": "agentevals run --dry-run",
     "squad:build": "squad build",
     "squad:check": "squad build --check",
     "squad:doctor": "squad doctor",
@@ -25,14 +28,31 @@
   "devDependencies": {
     "@bradygaster/squad-cli": "0.9.4",
     "@bradygaster/squad-sdk": "0.9.4",
+    "@github/copilot-sdk": "^0.3.0",
+    "@langchain/core": "^1.1.45",
+    "@microsoft/agents-hosting": "^1.5.1",
+    "@nem035/agentevals": "^0.1.2",
+    "@types/node": "^25.6.0",
+    "agentevals": "^0.0.7",
     "agentv": "4.24.1",
     "skills-ref": "0.1.5",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5",
     "yaml": "^2.8.1"
   },
   "engines": {
     "node": ">=20.12"
   },
   "overrides": {
-    "@anthropic-ai/sdk": "0.91.1"
+    "@anthropic-ai/sdk": "0.91.1",
+    "@microsoft/agents-hosting": {
+      "axios": "1.16.0"
+    },
+    "@microsoft/agents-activity": {
+      "uuid": "11.1.1"
+    },
+    "@opentelemetry/sdk-node": "0.218.0",
+    "@opentelemetry/exporter-prometheus": "0.218.0"
   }
 }

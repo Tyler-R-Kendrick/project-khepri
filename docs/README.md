@@ -16,6 +16,7 @@ Use these implementation files as the source of truth before changing docs:
 | AgentV scenarios and code-graders | `evals/github-agents` |
 | Legacy sample packs | `evals/legacy-samples` |
 | Squad configuration | `squad.config.ts` and `.squad` |
+| Local workflow WebUI | `webui` |
 
 ## Doc Index
 
@@ -24,6 +25,7 @@ Use these implementation files as the source of truth before changing docs:
 - `docs/agents/README.md`: custom-agent contract, .NET registry, skills, hooks, handoffs, and verification.
 - `docs/architecture/decisions/README.md`: active architecture decisions and durable rationale.
 - `CONTRIBUTING.md`: local setup, contribution flow, validation, and PR expectations.
+- `webui/`: local-first PWA and node host for prompt kickoff, Copilot SDK ambient auth, offline fallback, and graph visualization.
 - `SECURITY.md`: security reporting and secret-handling expectations.
 - `SUPPORT.md`: support and diagnostic guidance.
 - `CODE_OF_CONDUCT.md`: community behavior expectations.

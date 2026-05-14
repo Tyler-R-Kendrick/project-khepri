@@ -6,7 +6,7 @@ This repo does not yet contain a production modernization runtime or all concept
 
 ## Current Implementation
 
-The implemented system has seven primary surfaces:
+The implemented system has eight primary surfaces:
 
 | Surface | Current files | Purpose |
 | --- | --- | --- |
@@ -17,12 +17,17 @@ The implemented system has seven primary surfaces:
 | AgentV evals | `evals/github-agents` | Code-grader-backed checks for agent profile schema, least-privilege tools, skill and hook contracts, steering, workflow code, and docs coverage. |
 | Legacy sample packs | `evals/legacy-samples` | COBOL claims, legacy .NET Framework claims portal, and Java payment monolith fixtures used as regression evidence examples. |
 | Squad and Spec Kit integration | `squad.config.ts`, `.squad`, `.specify`, `.agents` | Local squad, Spec Kit, and auxiliary agent assets for modernization planning and workflow automation. |
+| Local WebUI | `webui` | Mobile-first PWA and node host for launching Copilot-backed Khepri runs while visualizing agent message flow and workflow state changes. |
 
 ## Architecture
 
 ```mermaid
 flowchart TB
     user["User modernization request"] --> orch["khepri-orchestrator"]
+    user --> webui["webui local PWA"]
+    webui --> host["Node host /api/chat"]
+    host --> sdk["GitHub Copilot SDK ambient auth"]
+    sdk --> orch
     orch --> skill["khepri-modernization-workflow skill"]
     skill --> contract["ModernizationWorkflow.CreateContract()"]
     contract --> registry["GitHubCopilotModernizationAgentRegistry"]
@@ -135,6 +140,7 @@ dotnet/               .NET workflow contract and tests
 evals/                AgentV graders and legacy sample packs
 python/prompts/       Legacy modernizer prompt guidance aligned to the current workflow
 scripts/              Repository maintenance scripts
+webui/                Local-first PWA and node host for Khepri run kickoff and graph visualization
 ```
 
 ## Verification
@@ -158,6 +164,13 @@ For squad-generated assets:
 
 ```powershell
 npm run squad:check
+```
+
+Run the local WebUI with:
+
+```powershell
+npm --prefix webui install
+npm run webui:dev
 ```
 
 ## Roadmap Ideas

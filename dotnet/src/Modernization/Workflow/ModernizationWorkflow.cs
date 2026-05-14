@@ -43,6 +43,12 @@ public sealed record AgentEvalRequirement(
     string EvaluatorType,
     string Purpose);
 
+public sealed record ModernizationStageAgentCall(
+    string StageId,
+    IReadOnlyList<string> AgentNames,
+    IReadOnlyList<AgentEvalRequirement> RequiredAgentEvals,
+    IReadOnlyList<string> RequiredEvidence);
+
 public sealed record AtomicModernizationStepContract(
     string StageId,
     string SmallestUnit,
@@ -107,24 +113,6 @@ public static class ModernizationWorkflow
         SquadGeneratorAgentName
     ];
 
-    private static readonly string[] SequentialAgentOrder =
-    [
-        OrchestratorAgentName,
-        EvolutionAgentName,
-        SpecAgentName,
-        KnowledgeAgentName,
-        AppModernizationAgentName,
-        DataModernizationAgentName,
-        InfraModernizationAgentName,
-        SecurityModernizationAgentName,
-        PlannerAgentName,
-        SquadGeneratorAgentName,
-        ScaffoldAgentName,
-        CodeAgentName,
-        TestAgentName,
-        AssessorAgentName
-    ];
-
     private static readonly string[] AreaModernizationAgents =
     [
         AppModernizationAgentName,
@@ -144,19 +132,34 @@ public static class ModernizationWorkflow
                     "Generate or extract requirements, specifications, executable tests, and queryable knowledge-base entries from existing legacy systems before target work begins.",
                     [SpecAgentName, KnowledgeAgentName, TestAgentName],
                     [],
-                    ["source evidence", "legacy behavior inventory", "legacy regression seed tests", "legacy queryable knowledge base"]),
+                    ["source evidence", "legacy behavior inventory", "legacy regression seed tests", "legacy queryable knowledge base"])
+                {
+                    RequiredAgentEvals = StageAgentEvals(
+                        "legacy-requirements-specs-tests",
+                        "legacy requirements/specs/tests extraction")
+                },
                 new ModernizationWorkflowStage(
                     "target-requirements-specs-test-plans",
                     "Generate or extract requirements, specifications, test plans, and queryable knowledge-base entries from target desired-state systems and standards.",
                     [SpecAgentName, KnowledgeAgentName, PlannerAgentName],
                     [],
-                    ["target desired state evidence", "acceptance criteria", "test-PLANS", "target queryable knowledge base"]),
+                    ["target desired state evidence", "acceptance criteria", "test-PLANS", "target queryable knowledge base"])
+                {
+                    RequiredAgentEvals = StageAgentEvals(
+                        "target-requirements-specs-test-plans",
+                        "target requirements/specs/test-PLANS extraction")
+                },
                 new ModernizationWorkflowStage(
                     "incremental-modernization-plan",
                     "Generate the high-level incremental modernization plan from the legacy and target specs.",
                     [PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, SecurityModernizationAgentName],
                     [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
-                    ["increment map", "area risks", "security risks", "approval checkpoints"]),
+                    ["increment map", "area risks", "security risks", "approval checkpoints"])
+                {
+                    RequiredAgentEvals = StageAgentEvals(
+                        "incremental-modernization-plan",
+                        "high-level incremental modernization planning")
+                },
                 new ModernizationWorkflowStage(
                     "increment-area-squads",
                     "Use the dedicated squad generator to generate specialized app, data, infra, and security squads for each increment, using a TDD loop with AgentEvals from agentevals.io before implementation.",
@@ -166,14 +169,9 @@ public static class ModernizationWorkflow
                 {
                     RequiredAgentEvals =
                     [
-                        new AgentEvalRequirement(
-                            "tool-calling",
-                            "tool_trajectory",
-                            "Proves generated squads call the required modernization agents, tools, and handoffs in the intended order."),
-                        new AgentEvalRequirement(
-                            "relevance",
-                            "llm_judge",
-                            "Proves generated squad recommendations stay relevant to the active increment, legacy behavior, and target desired state."),
+                        ..StageAgentEvals(
+                            "increment-area-squads",
+                            "increment-specific squad generation"),
                         new AgentEvalRequirement(
                             "squad-member-rubric",
                             "llm_judge",
@@ -189,14 +187,43 @@ public static class ModernizationWorkflow
                     "Use the generated squads and queryable knowledge base to refine a detailed modernization plan for the current stage.",
                     [KnowledgeAgentName, PlannerAgentName, AppModernizationAgentName, DataModernizationAgentName, InfraModernizationAgentName, SecurityModernizationAgentName],
                     [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
-                    ["knowledge refinement", "stage-ready plan", "dependencies", "rollback plan", "regression gates"]),
+                    ["knowledge refinement", "stage-ready plan", "dependencies", "rollback plan", "regression gates"])
+                {
+                    RequiredAgentEvals = StageAgentEvals(
+                        "current-stage-plan-refinement",
+                        "current-stage detailed modernization plan refinement")
+                },
                 new ModernizationWorkflowStage(
                     "tdd-modernization-execution",
                     "Act on the current stage plan with TDD, keeping legacy regression checks and queryable knowledge refinement central to every red/green/refactor loop.",
-                    [KnowledgeAgentName, CodeAgentName, TestAgentName, AssessorAgentName],
+                    [KnowledgeAgentName, ScaffoldAgentName, CodeAgentName, TestAgentName, AssessorAgentName],
                     [ModernizationArea.App, ModernizationArea.Data, ModernizationArea.Infra, ModernizationArea.Security],
                     ["legacy regression checks", "red/green/refactor evidence", "knowledge refinement", "AgentEvals rerun", "acceptance evidence"])
+                {
+                    RequiredAgentEvals = StageAgentEvals(
+                        "tdd-modernization-execution",
+                        "legacy-regression-centered TDD execution")
+                }
             ]);
+    }
+
+    public static IReadOnlyList<ModernizationStageAgentCall> CreateAgentCallPlan()
+    {
+        return CreateContract().Stages
+            .Select(stage => new ModernizationStageAgentCall(
+                stage.Id,
+                AgentsForStage(stage),
+                stage.RequiredAgentEvals,
+                stage.RequiredEvidence))
+            .ToArray();
+    }
+
+    public static IReadOnlyList<string> CreateAgentExecutionOrder()
+    {
+        return CreateAgentCallPlan()
+            .SelectMany(call => call.AgentNames)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
     }
 
     public static IReadOnlyList<AtomicModernizationStepContract> CreateAtomicStepContracts()
@@ -338,7 +365,7 @@ public static class ModernizationWorkflow
         ArgumentNullException.ThrowIfNull(registeredAgents);
         return AgentWorkflowBuilder.BuildSequential(
             "khepri-incremental-modernization",
-            SelectAgents(registeredAgents, SequentialAgentOrder));
+            SelectAgents(registeredAgents, CreateAgentExecutionOrder()));
     }
 
     public static AgentFrameworkWorkflow BuildIncrementSquadWorkflow(string incrementId, IReadOnlyDictionary<string, AIAgent> registeredAgents)
@@ -378,6 +405,33 @@ public static class ModernizationWorkflow
 
             yield return agent;
         }
+    }
+
+    private static IReadOnlyList<string> AgentsForStage(ModernizationWorkflowStage stage)
+    {
+        return new[] { OrchestratorAgentName, EvolutionAgentName }
+            .Concat(stage.RequiredAgents)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static IReadOnlyList<AgentEvalRequirement> StageAgentEvals(string stageId, string behavior)
+    {
+        return
+        [
+            new AgentEvalRequirement(
+                "tool-calling",
+                "tool_trajectory",
+                $"Proves registered agents and subagents call the required tools and handoffs for {stageId}: {behavior}."),
+            new AgentEvalRequirement(
+                "relevance",
+                "llm_judge",
+                $"Proves agent outputs stay relevant to {stageId}, the active modernization increment, legacy behavior, and target desired state."),
+            new AgentEvalRequirement(
+                "evidence-completeness",
+                "rubric",
+                $"Grades whether {stageId} produced all required evidence before the workflow advances.")
+        ];
     }
 
     private static List<ChatMessage> AggregateSquadMessages(IList<List<ChatMessage>> squadOutputs)

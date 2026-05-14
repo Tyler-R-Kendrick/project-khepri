@@ -623,8 +623,11 @@ tests:
         - agentevals.io
         - tool_trajectory
         - llm_judge
+        - rubric
+        - CreateAgentCallPlan
         - tool-calling
         - relevance
+        - evidence-completeness
         - legacy regression
         - red/green/refactor
     assertions:

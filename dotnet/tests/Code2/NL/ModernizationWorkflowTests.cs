@@ -53,6 +53,56 @@ public sealed class ModernizationWorkflowTests
     }
 
     [TestMethod]
+    public void EveryWorkflowStageHasAgentEvalCoverageForAgenticBehavior()
+    {
+        var contract = ModernizationWorkflow.CreateContract();
+
+        foreach (var stage in contract.Stages)
+        {
+            Assert.IsTrue(
+                stage.RequiredAgentEvals.Any(eval => eval.EvaluatorType == "tool_trajectory"),
+                $"{stage.Id} must prove registered tool and subagent calls with a tool_trajectory evaluator.");
+            Assert.IsTrue(
+                stage.RequiredAgentEvals.Any(eval => eval.Name == "relevance" && eval.EvaluatorType == "llm_judge"),
+                $"{stage.Id} must prove relevance with an llm_judge evaluator.");
+            Assert.IsTrue(
+                stage.RequiredAgentEvals.Any(eval => eval.EvaluatorType == "rubric"),
+                $"{stage.Id} must have rubric coverage for evidence completeness.");
+        }
+    }
+
+    [TestMethod]
+    public void AgentCallPlanCoversEveryStageAndRegisteredAgent()
+    {
+        var contract = ModernizationWorkflow.CreateContract();
+        var callPlan = ModernizationWorkflow.CreateAgentCallPlan();
+
+        CollectionAssert.AreEqual(
+            contract.Stages.Select(stage => stage.Id).ToArray(),
+            callPlan.Select(call => call.StageId).ToArray());
+
+        foreach (var stage in contract.Stages)
+        {
+            var call = callPlan.Single(item => item.StageId == stage.Id);
+            CollectionAssert.Contains(call.AgentNames.ToArray(), ModernizationWorkflow.OrchestratorAgentName);
+            CollectionAssert.Contains(call.AgentNames.ToArray(), ModernizationWorkflow.EvolutionAgentName);
+
+            foreach (var requiredAgent in stage.RequiredAgents)
+            {
+                CollectionAssert.Contains(call.AgentNames.ToArray(), requiredAgent, $"{stage.Id} must call {requiredAgent}.");
+            }
+
+            CollectionAssert.AreEqual(stage.RequiredEvidence.ToArray(), call.RequiredEvidence.ToArray());
+            CollectionAssert.AreEqual(stage.RequiredAgentEvals.ToArray(), call.RequiredAgentEvals.ToArray());
+        }
+
+        var executionOrder = ModernizationWorkflow.CreateAgentExecutionOrder();
+        CollectionAssert.AreEquivalent(contract.RegisteredAgents.ToArray(), executionOrder.ToArray());
+        Assert.AreEqual(ModernizationWorkflow.OrchestratorAgentName, executionOrder[0]);
+        Assert.AreEqual(ModernizationWorkflow.EvolutionAgentName, executionOrder[1]);
+    }
+
+    [TestMethod]
     public void SquadGenerationStageUsesDedicatedAgentEvalTddGenerator()
     {
         var contract = ModernizationWorkflow.CreateContract();
@@ -213,6 +263,7 @@ public sealed class ModernizationWorkflowTests
         Assert.IsTrue(skill.Contains("dotnet/src/Modernization/Workflow/ModernizationWorkflow.cs", StringComparison.Ordinal));
         Assert.IsTrue(skill.Contains("dotnet/src/Modernization/Workflow/GitHubCopilotModernizationAgentRegistry.cs", StringComparison.Ordinal));
         Assert.IsTrue(skill.Contains("ModernizationWorkflow.CreateContract", StringComparison.Ordinal));
+        Assert.IsTrue(skill.Contains("ModernizationWorkflow.CreateAgentCallPlan", StringComparison.Ordinal));
         Assert.IsTrue(skill.Contains("BuildMicrosoftAgentFrameworkWorkflow", StringComparison.Ordinal));
         Assert.IsTrue(skill.Contains("dotnet test dotnet\\tests\\Code2\\NL\\Code2NL.Tests.csproj", StringComparison.Ordinal));
     }

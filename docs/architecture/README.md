@@ -31,6 +31,7 @@ flowchart TB
       package["package.json scripts"]
       squad["squad.config.ts and .squad"]
       specify[".specify"]
+      webui["webui local PWA and node host"]
       docs["README and docs"]
     end
 
@@ -48,7 +49,15 @@ flowchart TB
     package --> agentv
     squad --> agents
     specify --> skills
+    webui --> agents
+    webui --> package
 ```
+
+## Local WebUI
+
+`webui` implements a local-first, mobile-first PWA for starting Khepri runs and watching agent state. The SPA uses `@ai-sdk/react` chat state with a text-stream transport, renders AI response parts instead of raw message JSON, stores draft and run progress in `localStorage`, and registers a service worker for offline app-shell caching.
+
+The node host in `webui/server/index.ts` owns `/api/chat` and `/api/health`. `/api/chat` creates a GitHub Copilot SDK session with `useLoggedInUser: true`, so local runs use ambient Copilot auth rather than checked-in secrets. When Copilot CLI/auth is unavailable, the endpoint streams a deterministic local fallback so the UI and graph remain usable offline.
 
 ## Workflow Contract
 

@@ -1,0 +1,18 @@
+{
+  "name": "Khepri Workflow",
+  "short_name": "Khepri",
+  "description": "Local-first Khepri workflow graph and Copilot chat host.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141615",
+  "theme_color": "#141615",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

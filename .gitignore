@@ -290,6 +290,8 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+webui/dist/
+webui/node_modules/
 
 # AgentV local evaluation run output
 .agentv/cache.json
